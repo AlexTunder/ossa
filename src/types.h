@@ -1,5 +1,6 @@
 #pragma once
 #ifndef TYPES_H
+#define TYPES_H
 // basic
 struct UserList{
     char *name;
@@ -33,28 +34,11 @@ struct Roler{
     struct Role role;
     struct Roler *next;
 };
-//Workspace
-struct ConfirmsSources{
-    struct UsersLinks ids;
-    char *filename;
-};
-struct ConfirmsSourcesList{
-    struct ConfirmsSources file;
-    struct ConfirmsSourcesList *next;
-};
-struct Workspace{
-    int allowKey;
-    struct ConfirmsSourcesList csl;
-    struct Workspace *next;
-};
 //Basic Chat
 struct Chat{
     struct FileSync syncer;
     struct UserList userList;
     struct MessageList messages;
     struct Roler roler;
-    #ifdef stdChatEnable_Workspace
-        struct Workspace workspace;
-    #endif
 };
 #endif

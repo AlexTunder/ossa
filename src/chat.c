@@ -5,6 +5,19 @@
 
 #define region      if(1)
 
+//No crypto chat file
+#define CCHAT_FLAG_NOCRYPTO 1<<0
+//Drop only chat
+#define CCHAT_FLAG_DROPOCWM 1<<1
+//Enable native access mode
+#define CCHAT_FLAG_ACCESS_E 1<<2
+//Runtime network sending
+#define CCHAT_FLAG_RUNTIMEN 1<<3
+//Native audio support
+#define CCHAT_FLAG_NAUDIO_E 1<<4
+
+int CCHAT_GLOBAL_SETTINGS = CCHAT_FLAG_ACCESS_E;
+
 struct FileSync initFileSync(const char *path, const char *cfgName){
     struct FileSync me;
     me.path = (char*)malloc(strlen(path));
@@ -52,10 +65,7 @@ struct Roler initRoler(){
     struct Roler me = {initRole(), NULL};
     return me;
 }
-struct Workspace initWorkspace(){
-    struct Workspace me = {0,{{{0,0x0}, 0x0}, 0x0}, 0x0};
-    return me;
-}
+
 struct Chat initChat(const char *path){
     char *pth;
     if(path == NULL){
@@ -70,10 +80,6 @@ struct Chat initChat(const char *path){
     initUserList(),
     initML(), 
     initRoler()
-    #ifdef stdChatEnable_Workspace
-    ,initWorkspace()
-    
-    #endif
     };
     return me;
 }
@@ -133,6 +139,65 @@ struct UserList *getUserById(struct UserList *userList, int id){
         else return NULL;
     }
     return counter;
+}
+struct MessageList loadMLFromFile(const char *filename){
+    struct MessageList me = initML();
+    #include "fbase.h"
+    target = fopen(filename, "r");
+    if(target == 0x0){
+        printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
+        return me;
+    }
+
+    char c = 0;
+    char err[1024];
+    while(1){ /*read one message*/
+        sprintf(mesBuf, "\0");
+        if(fread(&c, 1, 1, target) == 0) break;
+        //Syntax check
+        if(c != 1){
+            sprintf(err, "Failed to read chat from file: corrupted syntax (no HEAD)");
+            pushMessageToML(makeMes(err, 0), &me);
+            return me;
+        }
+        struct Message sub = makeMes("", 0);
+        fread(&sub.userid, sizeof(sub.userid), 1, target);
+        fread(&sub.date, sizeof(sub.date), 1, target);
+        fread(&c, 1, 1, target);
+        //Syntax check
+        if(c!=2){
+            sprintf(err, "Failed to read chat from file: corrupted syntax (no BODY-START)");
+            pushMessageToML(makeMes(err, 0), &me);
+            return me;
+        }
+        do{
+            strcat(mesBuf, &c);
+            if(fread(&c, 1, 1, target) == 0) break;
+        }while(c!=3);
+        sub.content = (char*)malloc(strlen(mesBuf));
+        strcpy(sub.content, mesBuf);
+        pushMessageToML(sub, &me);
+    }
+
+    return me;
+}
+struct UserList loadULFromFile(const char *filename){
+    struct UserList me;
+    FILE *target = fopen(filename, "r");
+    if(target == 0x0){
+        printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
+        return me;
+    }
+    return me;
+}
+struct Roler loadRolerFromFile(const char *filename){
+    struct Roler me;
+    FILE *target = fopen(filename, "r");
+    if(target == 0x0){
+        printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
+        return me;
+    }
+    return me;
 }
 
 int getRolesCount(struct Roler *roler){
@@ -255,31 +320,51 @@ void addUserToRole(struct Roler *roler, int id, int roleID, struct UserList* ul)
         }
     }
 }
-int dropChatToFile(struct Chat *chat){
+int dropChatToFile(struct Chat *chat, char *fn_c, char *fn_u, char *fn_r){
     char *fn;
     region{ /* drop userlist */
-        fn = (char*)malloc(1024);
-        sprintf(fn, "%s/%s", chat->syncer.path, "user.list");
+        if(fn_u == 0x0){ //by default using user.list
+            fn = (char*)malloc(1024);
+            sprintf(fn, "%s/%s", chat->syncer.path, "user.list");
+        } else fn = fn_u;
         FILE *fd = fopen(fn, "w");
         int max = getUsersCount(chat);
         for(int i = 0; i < max; i++)
-            fprintf(fd, "%i\t%s\n", i, getUsernameByID(i, &chat->userList));
+            fprintf(fd, "%s%s%s\n", (char*)getUserById(&chat->userList, i), (char*)getUserById(&chat->userList, i), getUserById(&chat->userList, i)->name);
         fflush(fd);
         fclose(fd);
+        if(fn_u == 0x0) free(fn);
     }
     region{ /* drop messagelist */
-        fn = (char*)malloc(1024);
-        sprintf(fn, "%s/%I64i-%I64i", chat->syncer.path, chat->messages.me.date, getLastFromChat(chat).date);
+        if(fn_c == 0x0){//by default using ctime of first and last messages
+            fn = (char*)malloc(1024);
+            sprintf(fn, "%s/%I64i-%I64i", chat->syncer.path, chat->messages.me.date, getLastFromChat(chat).date);
+        } else fn = fn_c;
         FILE *fd = fopen(fn, "w");
         int max = getMessagesCount(chat);
-        for(int i = 0; i < max; i++)
-            fprintf(fd, "[%i:%I64i]%i:%s\n", i, getMessage(chat, i).date, getMessage(chat, i).userid, getMessage(chat, i).content);
+        struct MessageList *counter = &chat->messages;
+        for(int i = 0; i < max; i++){
+            fprintf(fd, "%c", 1);
+            fwrite(&counter->me.userid, sizeof(counter->me.userid), 1, fd);
+            fwrite(&counter->me.date, sizeof(counter->me.date), 1, fd);
+            fprintf(fd, "%c", 2);
+            for(long long i = 0; i < strlen(counter->me.content); i++)
+                if(CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NOCRYPTO)
+                    fprintf(fd, "%c", counter->me.content[i]);
+                else
+                    fprintf(fd, "%c", ~counter->me.content[i]);
+            fprintf(fd, "%c", 3);
+            counter = counter->next;
+        }
         fflush(fd);
-        fclose(fd);   
+        fclose(fd);
+        if(fn_c == 0x0) free(fn);
     }
     region{ /* drop roles */
-        fn = (char*)malloc(1024);
-        sprintf(fn, "%s/%s", chat->syncer.path, "roles.list");
+        if(fn_r == 0x0){//by default using roles.list
+            fn = (char*)malloc(1024);
+            sprintf(fn, "%s/%s", chat->syncer.path, "roles.list");
+        } else fn = fn_r;
         FILE *fd = fopen(fn, "w");
         int max = getRolesCount(&chat->roler);
         struct Roler *roler_c = &chat->roler;
@@ -291,7 +376,7 @@ int dropChatToFile(struct Chat *chat){
                 for(int ui = 0; ; ui++){
                     if(ulc == NULL) break;
                     if(ulc->id != -1){
-                        fprintf(fd, ",%i", ulc->id);
+                        fprintf(fd, " %i", ulc->id);
                     }
                     ulc=ulc->next;
                 }
@@ -302,6 +387,7 @@ int dropChatToFile(struct Chat *chat){
         }
         fflush(fd);
         fclose(fd);
+        if(fn_r == 0x0) free(fn);
     }
     return 0;
 }
@@ -313,6 +399,7 @@ int checkInRole(struct Role *role, int user){
     }
     return 0; //User haven't permission
 }
+
 #ifdef ENABLE_ACCESS
 int getUserAccess(int userid, struct UserList *userList){
     if(userList == NULL)
@@ -322,7 +409,7 @@ int getUserAccess(int userid, struct UserList *userList){
     for(; i < userid;i++){
         if(counter->next != NULL)
             counter = counter->next;
-        else return NULL;
+        else return -1;
     }
     return counter->access;
 }

@@ -1,6 +1,5 @@
 #define AIRLIB_PATH "/"
-#define ENABLE_ACCESS
-#define stdChatEnable_Workspace
+#define ENABLE_ACCESS   
 // #include "..\airlib\OpenCppNet\Socket.hpp"
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,11 +28,22 @@
 //Global variables
 int last = 0;
 
-int handleCommand(char comm[16][32], struct Chat *chat, int *me){
+int handleCommand(char comm[32][16], struct Chat *chat, int *me){
     if(!strcmp(comm[0], "exit") || !strcmp(comm[0], "q"))
         return CLI_EXIT;
     else if(!strcmp(comm[0], "drop")){
-        dropChatToFile(chat);
+        // dropChatToFile(chat);
+        char *fns[3] = {0x0,0x0,0x0};
+        for(int i = 0; i < 32 && strcmp(comm[i], ""); i++){
+            if(!strcmp(comm[i], "-chat")){
+                fns[0] = comm[++i];
+            } else if(!strcmp(comm[i], "-users")){
+                fns[1] = comm[++i];
+            } else if(!strcmp(comm[i], "-roles")){
+                fns[2] = comm[++i];
+            }
+        }
+        dropChatToFile(chat, fns[0], fns[1], fns[2]);
         return CLI_OK_DROP;
     } else if(!strcmp(comm[0], "useradd")){
         if(getUserAccess(*me, &chat->userList) & acc_users){
@@ -181,10 +191,73 @@ int handleCommand(char comm[16][32], struct Chat *chat, int *me){
                 printf("YES\n");
             else printf("NO\n");
         }
-    } else if(comm[0], "ban"){
+    } else if(!strcmp(comm[0], "ban")){
         int user_id = atoi(comm[1]);
         addUserToRole(&chat->roler, user_id, 0, &chat->userList);
-    }
+    } else if(!strcmp(comm[0], "long")){
+        char *input = (char*) malloc(4294967295);
+        char stop = *comm[1];
+        char c = 0;
+        unsigned long counter = 0;
+        do{
+            c = getchar();
+            if(c == stop) break;
+            else if(c == 8) counter -= 2;
+            else input[counter] = c;
+            counter++;
+        }while(c != stop);
+        pushMessage(makeMes(input, *me), chat);
+    }else if(!strcmp(comm[0], "conf")){
+            if(!strcmp(comm[1], "view")){
+                if(!strcmp(comm[2], "minimal")){
+                    for(char i = 8; i >= 0; i++)
+                        printf("%c", CCHAT_GLOBAL_SETTINGS & 1 << i ? '1' : '0');
+                    printf(" %x\n", CCHAT_GLOBAL_SETTINGS);
+                }else{
+                    printf("[%c] Dropping without cryptographi\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NOCRYPTO ? '*' : ' ');
+                    printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DROPOCWM ? '*' : ' ');
+                    printf("[%c] Native access support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_ACCESS_E ? '*' : ' ');
+                    printf("[%c] Runtime sending data\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_RUNTIMEN ? '*' : ' ');
+                    printf("[%c] Native audio support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NAUDIO_E ? '*' : ' ');
+                    // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
+                    // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
+                    // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
+                }
+            }else if(!strcmp(comm[1], "set")){
+                if(!strcmp(comm[2], "crypto")){
+                    if(*comm[3] == '0' || *comm[3] == 'n')
+                        CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_NOCRYPTO;
+                    else CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_NOCRYPTO;
+                }else if(!strcmp(comm[2], "doc")){
+                    if(*comm[3] == '0' || *comm[3] == 'n')
+                        CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_DROPOCWM;
+                    else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_DROPOCWM;
+                }else if(!strcmp(comm[2], "native-acc")){
+                    if(*comm[3] == '0' || *comm[3] == 'n')
+                        CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_ACCESS_E;
+                    else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_ACCESS_E;
+                }else if(!strcmp(comm[2], "runtime-n")){
+                    if(*comm[3] == '0' || *comm[3] == 'n')
+                        CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_RUNTIMEN;
+                    else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_RUNTIMEN;
+                }else if(!strcmp(comm[2], "native-aud")){
+                    if(*comm[3] == '0' || *comm[3] == 'n')
+                        CCHAT_GLOBAL_SETTINGS &= CCHAT_FLAG_NAUDIO_E;
+                    else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_NAUDIO_E;
+                }
+            }
+        } else if(!strcmp(comm[0], "load")){
+            if(!strcmp(comm[1], "")){
+                printf("No chat file. Use \':load [filename]\'\n");
+                return CLI_OK_NOUT;
+            }
+            printf("All current chat message will destroyed\n\tAre you sure to load? [y/N] ");
+            char a = getchar();
+            if(a == 'y' || a == 'Y'){
+                last = 0;
+                chat->messages = loadMLFromFile(comm[1]);
+            }else printf("Aborted\n");
+        }
     else {
         printf("Command \'%s\' is not found\n", comm[0]);
         return CLI_CNF;
@@ -198,10 +271,10 @@ int handleCLI(struct Chat *chat, int *me){
     }
     if(y == ':'){
         //Handle command
-        char comms[16][32];
+        char comms[32][16];
         for(int i = 0; i < 16; i++)
             for(int j = 0; j < 32; j++)
-                comms[i][j] = 0;
+                comms[j][i] = 0;
         char c = 0;
         int commcounter = 0;
         for( ; ; ){
