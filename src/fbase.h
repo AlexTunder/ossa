@@ -7,5 +7,5 @@ FILE *target;
 // char crypto[16];
 
 //Body reading
-char mesBuf[5120];
+char *mesBuf = (char*)malloc(5120);
 // int userid;

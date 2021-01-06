@@ -170,15 +170,16 @@ struct MessageList loadMLFromFile(const char *filename){
             pushMessageToML(makeMes(err, 0), &me);
             return me;
         }
+        fread(&c, 1, 1, target);
         do{
-            strcat(mesBuf, &c);
+            sprintf(mesBuf, "%s%c", mesBuf, c);
             if(fread(&c, 1, 1, target) == 0) break;
         }while(c!=3);
         sub.content = (char*)malloc(strlen(mesBuf));
         strcpy(sub.content, mesBuf);
         pushMessageToML(sub, &me);
     }
-
+    free(mesBuf);
     return me;
 }
 struct UserList loadULFromFile(const char *filename){
