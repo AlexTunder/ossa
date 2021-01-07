@@ -17,6 +17,9 @@ Open Source Social Alience
 - [x] допилить loadULFromFile
 - [ ] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
 - [x] допилить loadRolerFromFile
+- [ ] реализовать loadULFromStream
+- [ ] реализовать loadMLFromStream
+- [ ] реализовать loadRolerFromStream
 ### Network
 - [ ] Разработать схему объединения клиентов в блокчейн
 - [ ] Разработать алгоритм шифрования и протокол
