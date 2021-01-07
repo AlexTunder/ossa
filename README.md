@@ -8,9 +8,7 @@ Open Source Social Alience
 
 ## Скачать исполняемый файл
 [Сам чат](https://drive.google.com/file/d/1a_IDv1pZulpkaI3KB8KAmspbyNlafeY_/view?usp=sharing)
-
 [Дистрибутив для скачивания](https://drive.google.com/file/d/16fniIvitGigYiTRNTXNFYnpDqnDOg7g2/view?usp=sharing)
-
 
 ## Задачи на Январь/Февраль
 ### Core, API
