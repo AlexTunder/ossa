@@ -1,4 +1,4 @@
-# ossa
+# OSSA
 Open Source Social Alience
 
 * keemo.src - папка для тестовых кодов на языке JS под ботов. Реализуем позже. Куда позже
