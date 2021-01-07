@@ -7,8 +7,9 @@ Open Source Social Alience
 * ui - код для UI (логично, да?)
 
 ## Скачать исполняемый файл
-[Сам чат](https://drive.google.com/file/d/1a_IDv1pZulpkaI3KB8KAmspbyNlafeY_/view?usp=sharing)
-[Дистрибутив для скачивания](https://drive.google.com/file/d/16fniIvitGigYiTRNTXNFYnpDqnDOg7g2/view?usp=sharing)
+[Сам чат](https://drive.google.com/file/d/1a_IDv1pZulpkaI3KB8KAmspbyNlafeY_/view?usp=sharing) и
+[менеджер ресурсов](https://drive.google.com/file/d/16fniIvitGigYiTRNTXNFYnpDqnDOg7g2/view?usp=sharing)
+доступны на Google Disk
 
 ## Задачи на Январь/Февраль
 ### Core, API
