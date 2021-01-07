@@ -16,7 +16,10 @@ Open Source Social Alience
 - [x] решить баг в функции loadMLFromFile, line 175. SIGSEGV (bug issue #0001)
 - [x] допилить loadULFromFile
 - [ ] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
-- [ ] допилить loadRolerFromFile
+- [x] допилить loadRolerFromFile
+- [ ] реализовать loadULFromStream
+- [ ] реализовать loadMLFromStream
+- [ ] реализовать loadRolerFromStream
 ### Network
 - [ ] Разработать схему объединения клиентов в блокчейн
 - [ ] Разработать алгоритм шифрования и протокол
