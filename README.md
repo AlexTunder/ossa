@@ -15,7 +15,7 @@ Open Source Social Alience
 ### Core, API
 - [x] решить баг в функции loadMLFromFile, line 175. SIGSEGV (bug issue #0001)
 - [x] допилить loadULFromFile
-- [ ] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
+- [x] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
 - [x] допилить loadRolerFromFile
 - [ ] реализовать loadULFromStream
 - [ ] реализовать loadMLFromStream
