@@ -208,12 +208,54 @@ struct Roler loadRolerFromFile(const char *filename){
     struct Roler me = initRoler();
     FILE *target = fopen(filename, "r");
     if(target == 0x0){
-        printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
+        fprintf(stderr, "Failed to open file \'%s\' (reading Roler)\n", filename);
         return me;
     }
     char c = 0, *name = (char*)malloc(32);
-    while(1){
-
+    for(long roleid = 0; ; roleid++){
+        struct Role this;
+        // if(fread(&c, 1, 1, target) == 0) return me;
+        // else fseek(target, SEEK_CUR-1, 0);
+        for(int i = 0; c != '\t'; i++){
+            if(fread(&c, 1, 1, target) == 0) return me;
+            else if(i >= 32){
+                fprintf(stderr, "Fatal error: invelid syntax in %s file. rolename is too long (should be less then 32)\n", filename);
+            }
+            else if(c != '\t')
+                name[i] = c;
+        }
+        this.name = (char*)malloc(strlen(name));
+        strcpy(this.name, name);
+        for(int i = 0; i < 32; i++)
+            name[i] = 0;
+        if(c != '\t'){
+            fprintf(stderr, "Fatal error: invelid syntax in \'%s\' file. \' \' is skipped, stage 0. unexpected: \'%c\'(%i)\n", filename, c, c);
+            return initRoler();
+        }
+        fread(&this.access, 4, 1, target);
+        fread(&c, 1, 1, target);
+        if(c != '\t'){
+            fprintf(stderr, "Fatal error: invelid syntax in \'%s\' file. \' \' is skipped, stage 1. unexpected: \'%c\'(%i)\n", filename, c, c);
+            return initRoler();
+        }
+        fread(&c, 1, 1, target);
+        if(c != '{'){
+            fprintf(stderr, "Fatal error: invelid syntax in \'%s\' file. \'{\' is skipped, stage 3. unexpected: \'%c\'(%i)\n", filename, c, c);
+            return initRoler();
+        }
+        addRole(&me, this.name, this.access);
+        int read = 0;
+        printf("ALLO\n");
+        while(fread(&c, 1, 1, target) != 0){ // Reading all userlinks for this role
+            if(c == '}') break;
+            else{
+                fseek(target, -1, SEEK_CUR);
+                fread(&read, 4, 1, target);
+                printf("IFF(%c)(%i)\n", c, c);
+                addUserToRole(&me, read, roleid, NULL);
+            }
+        }
+        printf("/ALLO\n");
     }
     return me;
 }
@@ -387,19 +429,20 @@ int dropChatToFile(struct Chat *chat, char *fn_c, char *fn_u, char *fn_r){
         int max = getRolesCount(&chat->roler);
         struct Roler *roler_c = &chat->roler;
         for(int i = 0; i < max+1; i++){
-            fprintf(fd, "%s\t%x\t%i\t{", roler_c->role.name, roler_c->role.access, roler_c->role.access);
+            fprintf(fd, "%s\t", roler_c->role.name);//{", roler_c->role.name, roler_c->role.access);
+            fwrite(&roler_c->role.access, sizeof(int), 1, fd);
+            fprintf(fd, "\t{");
             //перечисление всех юзеров в роле
             struct UsersLinks *ulc = &roler_c->role.usersList;
             if(ulc->next != NULL){
                 for(int ui = 0; ; ui++){
                     if(ulc == NULL) break;
-                    if(ulc->id != -1){
-                        fprintf(fd, " %i", ulc->id);
-                    }
+                    if(ulc->id != -1)
+                        fwrite(&ulc->id, 4, 1, fd);
                     ulc=ulc->next;
                 }
             }
-            fprintf(fd, "}\n");
+            fprintf(fd, "}");
             if(roler_c->next == NULL) break;
             else roler_c = roler_c->next;
         }
