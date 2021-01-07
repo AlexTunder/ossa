@@ -148,7 +148,6 @@ struct MessageList loadMLFromFile(const char *filename){
         printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
         return me;
     }
-
     char c = 0;
     char err[1024];
     while(1){ /*read one message*/
@@ -169,6 +168,7 @@ struct MessageList loadMLFromFile(const char *filename){
             pushMessageToML(makeMes(err, 0), &me);
             return me;
         }
+        sprintf(mesBuf, "\0");
         fread(&c, 1, 1, target);
         do{
             sprintf(mesBuf, "%s%c", mesBuf, c);
@@ -245,17 +245,14 @@ struct Roler loadRolerFromFile(const char *filename){
         }
         addRole(&me, this.name, this.access);
         int read = 0;
-        printf("ALLO\n");
         while(fread(&c, 1, 1, target) != 0){ // Reading all userlinks for this role
             if(c == '}') break;
             else{
                 fseek(target, -1, SEEK_CUR);
                 fread(&read, 4, 1, target);
-                printf("IFF(%c)(%i)\n", c, c);
                 addUserToRole(&me, read, roleid, NULL);
             }
         }
-        printf("/ALLO\n");
     }
     return me;
 }
