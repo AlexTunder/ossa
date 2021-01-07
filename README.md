@@ -7,8 +7,15 @@ Open Source Social Alience
 * ui - код для UI (логично, да?)
 
 ## Задачи на Январь/Февраль
-- [x] решить баг в функции loadMLFromFile, line 175. SIGSEGV
-- [ ] допилить loadULFromFile
+### Core, API
+- [x] решить баг в функции loadMLFromFile, line 175. SIGSEGV (bug issue #0001)
+- [x] допилить loadULFromFile
+- [ ] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
+### Network
 - [ ] допилить loadRolerFromFile
 - [ ] Разработать схему объединения клиентов в блокчейн
 - [ ] Разработать алгоритм шифрования и протокол
+### UI
+- [x] придерживаться VIM-подобного порядка комманд
+- [ ] перейти на curses вариант
+- [ ] Сделать backdround daemon для чтения сообщений из терминала командой в терминале
