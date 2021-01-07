@@ -256,6 +256,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             if(a == 'y' || a == 'Y'){
                 last = 0;
                 chat->messages = loadMLFromFile(comm[1]);
+                chat->userList = loadULFromFile("user.list");
             }else printf("Aborted\n");
         }
     else {

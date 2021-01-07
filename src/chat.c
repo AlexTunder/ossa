@@ -152,7 +152,6 @@ struct MessageList loadMLFromFile(const char *filename){
     char c = 0;
     char err[1024];
     while(1){ /*read one message*/
-        sprintf(mesBuf, "\0");
         if(fread(&c, 1, 1, target) == 0) break;
         //Syntax check
         if(c != 1){
@@ -175,6 +174,7 @@ struct MessageList loadMLFromFile(const char *filename){
             sprintf(mesBuf, "%s%c", mesBuf, c);
             if(fread(&c, 1, 1, target) == 0) break;
         }while(c!=3);
+        sprintf(mesBuf, "%s%c", mesBuf, 0);
         sub.content = (char*)malloc(strlen(mesBuf));
         strcpy(sub.content, mesBuf);
         pushMessageToML(sub, &me);
@@ -183,20 +183,37 @@ struct MessageList loadMLFromFile(const char *filename){
     return me;
 }
 struct UserList loadULFromFile(const char *filename){
-    struct UserList me;
+    struct UserList me = initUserList();
     FILE *target = fopen(filename, "r");
     if(target == 0x0){
         printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
         return me;
     }
+    char *name = (char*)malloc(32);
+    for(int i = 0; i < 32; i++)
+        name[i] = 0;
+    char c = 0;
+    while(fread(&c, 1, 1, target)){
+        if(c == '\n'){
+            if(*name != 0)
+                if(strcmp(name, "system")) pushUserToUL(name, &me);
+            for(int i = 0; i < 32; i++)
+                name[i] = 0;
+        }
+        else sprintf(name, "%s%c", name, c);
+    }
     return me;
 }
 struct Roler loadRolerFromFile(const char *filename){
-    struct Roler me;
+    struct Roler me = initRoler();
     FILE *target = fopen(filename, "r");
     if(target == 0x0){
         printf("Failed to open file \'%s\' (reading MessageList)\n", filename);
         return me;
+    }
+    char c = 0, *name = (char*)malloc(32);
+    while(1){
+
     }
     return me;
 }
@@ -331,7 +348,7 @@ int dropChatToFile(struct Chat *chat, char *fn_c, char *fn_u, char *fn_r){
         FILE *fd = fopen(fn, "w");
         int max = getUsersCount(chat);
         for(int i = 0; i < max; i++)
-            fprintf(fd, "%s%s%s\n", (char*)getUserById(&chat->userList, i), (char*)getUserById(&chat->userList, i), getUserById(&chat->userList, i)->name);
+            fprintf(fd, "%s\n", getUsernameByID(i, &chat->userList));
         fflush(fd);
         fclose(fd);
         if(fn_u == 0x0) free(fn);
@@ -370,7 +387,7 @@ int dropChatToFile(struct Chat *chat, char *fn_c, char *fn_u, char *fn_r){
         int max = getRolesCount(&chat->roler);
         struct Roler *roler_c = &chat->roler;
         for(int i = 0; i < max+1; i++){
-            fprintf(fd, "%i\t%s\t%x\t%i\t{", i, roler_c->role.name, roler_c->role.access, roler_c->role.access);
+            fprintf(fd, "%s\t%x\t%i\t{", roler_c->role.name, roler_c->role.access, roler_c->role.access);
             //перечисление всех юзеров в роле
             struct UsersLinks *ulc = &roler_c->role.usersList;
             if(ulc->next != NULL){
