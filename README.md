@@ -17,6 +17,7 @@ Open Source Social Alience
 - [x] допилить loadULFromFile
 - [x] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
 - [x] допилить loadRolerFromFile
+- [ ] оформить header для base.h: переписать объявления функций
 - [ ] реализовать loadULFromStream
 - [ ] реализовать loadMLFromStream
 - [ ] реализовать loadRolerFromStream
