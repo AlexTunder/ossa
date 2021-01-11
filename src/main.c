@@ -9,6 +9,15 @@
 #include <process.h>
 #include "./chat.h"
 
+//COLORS
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 //CLI codes
 #define CLI_OK_NOUT 0x00f0
 #define CLI_OK_DROP 0x00f1
@@ -52,7 +61,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 if(strcmp(comm[1], "\0"))
                     return pushUser(comm[1], chat);
         }
-        else printf("You haven't permission to this command. You need \'acc_users\' permission flag.\n");
+        else printf(ANSI_COLOR_RED"You haven't permission to this command. You need \'acc_users\' permission flag.\n"ANSI_COLOR_RESET);
         return CLI_OK_NOUT;
     } else if(!strcmp(comm[0], "lsuser")){
         int max = getUsersCount(chat);
@@ -69,7 +78,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     return CLI_OK_NOUT;
                 }
             }else{
-                printf("No permission. Get \'acc_evlog\' flag for login as everyone of users or use \':login [userid] [password]\'\n");
+                printf(ANSI_COLOR_RED"No permission. Get \'acc_evlog\' flag for login as everyone of users or use \':login [userid] [password]\'\n"ANSI_COLOR_RESET);
                 return CLI_NOPERM;
             }
         }else if(!strcmp(comm[1], "user")){
@@ -79,13 +88,13 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, atoi(comm[4]), &chat->userList);
                     else{
-                        printf("You should to have \'acc_roler\' permission flag do do that\n");
+                        printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
                     }
                 } else if(!strcmp(comm[3], "ban")){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, 0, &chat->userList);
                     else{
-                        printf("You should to have \'acc_roler\' permission flag do do that\n");
+                        printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
                     }
                 } else if(!strcmp(comm[3], "name")){
                     struct UserList *counter = &chat->userList;
@@ -98,7 +107,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     strcpy(counter->name, comm[4]);
                 }
             }else{
-                printf("You should to have \'acc_users\' permission flag do do that\n");
+                printf(ANSI_COLOR_RED"You should to have \'acc_users\' permission flag do do that\n"ANSI_COLOR_RESET);
             }
         }else if(!strcmp(comm[1], "role")){
             if(getUserAccess(*me, &chat->userList) & acc_roler){
@@ -111,11 +120,15 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     }
                 }
             }else{
-                printf("You should to have \'acc_roler\' permission flag do do that\n");
+                printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
             }
         }
         else {printf("bad \'set\' parameter (%s)\n", comm[1]);return CLI_CNF;}
     } else if(!strcmp(comm[0], "view")){
+        if(!(getUserAccess(me, &chat->userList) & 0b01)){
+            printf(ANSI_COLOR_RED"You was banned for reading. Contact with admin for solve this\n"ANSI_COLOR_RESET);
+            return CLI_NOPERM;
+        }
         if(!strcmp(comm[1], "all")){
             last = 0;
         }else if(!strcmp(comm[1], "tail")){
@@ -135,7 +148,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         if(getUserAccess(*me, &chat->userList) & acc_roler)
             addRole(&chat->roler, comm[1], 0);
         else{
-            printf("No You should to have \'acc_roler\' permission flag do do that\n");
+            printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
         }
     } else if(!strcmp(comm[0], "recompile")){
         char settings = 0; //1 bit = basic, 2 bit = updater, 3 bit = norun, 4 - main only
@@ -157,11 +170,11 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }
         printf("Compiling rules: %i%i%i\n", (settings & 0b100) ? 1:0, (settings & 0b010) ? 1:0, (settings & 0b001) ? 1:0);
         if(settings & 0b010){
-            printf("[*]Updating dist.exe\n[*]Killing proccess...\n");
+            printf("["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"]Updating dist.exe\n["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"]Killing proccess...\n");
             system("powershell Stop-Process -Name \"dist\" -Force");
-            printf("[*]Compile....\n[*]");
+            printf("["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"]Compile....\n["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"]");
             system("make updater");
-            printf("[*]Enter bootstrap...\n");
+            printf("["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"]Enter bootstrap...\n");
         }if(settings & 0b001){
             char *updaterCom = (char*)malloc(1024);
             sprintf(updaterCom, ".\\dist.exe");
@@ -215,11 +228,11 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                         printf("%c", CCHAT_GLOBAL_SETTINGS & 1 << i ? '1' : '0');
                     printf(" %x\n", CCHAT_GLOBAL_SETTINGS);
                 }else{
-                    printf("[%c] Dropping without cryptographi\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NOCRYPTO ? '*' : ' ');
-                    printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DROPOCWM ? '*' : ' ');
-                    printf("[%c] Native access support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_ACCESS_E ? '*' : ' ');
-                    printf("[%c] Runtime sending data\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_RUNTIMEN ? '*' : ' ');
-                    printf("[%c] Native audio support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NAUDIO_E ? '*' : ' ');
+                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Dropping without cryptographi\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NOCRYPTO ? '*' : ' ');
+                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DROPOCWM ? '*' : ' ');
+                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Native access support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_ACCESS_E ? '*' : ' ');
+                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Runtime sending data\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_RUNTIMEN ? '*' : ' ');
+                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Native audio support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NAUDIO_E ? '*' : ' ');
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
@@ -277,7 +290,25 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             strcat(link, comm[1]);
         #endif
         system(link);
-    } 
+    } else if(!strcmp(comm[0], "rm")){
+        if(!strcmp(comm[1], "user")){
+            struct UserList *ul = getUserById(&chat->userList, atoi(comm[2]));
+            if(ul != NULL){
+                free(ul->name);
+                getUserById(&chat->userList, atoi(comm[2]) - 1)->next = ul->next;
+                free(ul);
+            }
+        }else if(!strcmp(comm[1], "role")){
+            // TODO: code this. I don't want to do it now
+        }else if(!strcmp(comm[1], "message")){
+            struct MessageList *ml = getMLFromML(&chat->messages, atoi(comm[2]));
+            if(ml != 0x0){
+                free(ml->me.content);
+                getMLFromML(&chat->messages, atoi(comm[2]))->next = ml->next;
+                free(ml);
+            }
+        }
+    }
     else {
         printf("Command \'%s\' is not found\n", comm[0]);
         return CLI_CNF;
@@ -325,6 +356,10 @@ int handleCLI(struct Chat *chat, int *me){
             else if(c == 8) counter -= 2;
             else input[++counter] = c;
         }while(c != '\n');
+        if(!(getUserAccess(me, &chat->userList) & 0b10)){
+            printf(ANSI_COLOR_RED"You are mutted. Contant with admin of chat to solve this (your access: %p)\n"ANSI_COLOR_RESET, getUserAccess(me, &chat->userList));
+            return CLI_NOPERM;
+        }
         pushMessage(makeMes(input, *me), chat);
         // free(input);
     }
@@ -344,6 +379,8 @@ int main(int argc, char **argv){
    int me = 0;
    struct Chat chat = initChat(NULL);
    chat.userList.access = 0xffffffff;
+   chat.roler.role.access = 0xffffffff;
+   addUserToRole(&chat.roler, 0, 0, &chat.userList);
    addRole(&chat.roler, "Ban list", 0x0);
    while(1){
     for(int i = last; i < getMessagesCount(&chat); i++){

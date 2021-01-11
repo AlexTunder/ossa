@@ -95,6 +95,14 @@ struct Message getMessageML(struct MessageList *ml, int index){
     sprintf(err,"Error occuped while tring to find last message in %p MessageList. Reason - Counter start in NULL", (void*)ml);
     return makeMes(err, 0);
 }
+struct MessageList *getMLFromML(struct MessageList *ml, int index){
+    struct MessageList *counter = ml;
+    for(int i = 0; counter != NULL; counter = counter->next, i++)
+        if(counter->next == NULL || i == index) return counter;
+    char err[1024];
+    sprintf(err,"Error occuped while tring to find last message in %p MessageList. Reason - Counter start in NULL", (void*)ml);
+    return 0x0;
+}
 struct Message getMessage(struct Chat *chat, int index){
     return getMessageML(&chat->messages, index);
 }
@@ -111,6 +119,8 @@ struct UsersLinks makeUsersLinks(int *links, int count){
 }
 struct Role *getRoleByIndex(struct Roler *roler, int index){
     struct Roler *counter = roler;
+    if(counter == 0x0) return 0x0;
+    if(index == 0) return &roler->role;
     for(int i = 0; i < index; i++)
         if(counter != NULL) counter = counter->next;
         else return NULL;
@@ -223,7 +233,7 @@ void addUserToRole(struct Roler *roler, int id, int roleID, struct UserList* ul)
     int i = 0;
     struct Role *role = getRoleByIndex(roler, roleID);
     if(role == NULL){
-        printf("fatal error: %i roleID is invalid (%p roler %i role index is %p)\n", roleID, roler,roleID,role);
+        fprintf(stderr, "\x1b[31m[FATAL ERROR]\x1b[0m: %i roleID is invalid (%p roler %i role index is %p)\n", roleID, roler,roleID,role);
     }else{
         i = 0;
         struct UsersLinks *counter = &role->usersList;
