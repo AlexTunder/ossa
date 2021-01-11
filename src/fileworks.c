@@ -1,26 +1,20 @@
 #pragma once
-#ifndef CCHAT_TYPES_H
- #include "types.h"
-#endif
-#ifndef CCHAT_BASE_H
-#include "base.h"
-#endif
+#include "./types.h"
+#include "./base.h"
+#include "./nubis.h"
 
 #ifndef CCHAT_FILEWORKS_C
 #define CCHAT_FILEWORKS_C
 #define CCHAT_FILEWORKS_H
 
-struct MessageList loadMLFromStream(const char *target){
+struct MessageList loadMLFromStream(const char *str){
+    struct NCStream target = makeStream(str, strlen(str));
     char *mesBuf = (char*)malloc(5120);
     struct MessageList me = initML();
-    if(target == 0x0){
-        printf("Failed to open stream (reading MessageList)\n");
-        return me;
-    }
     char c = 0;
     char err[1024];
     while(1){ /*read one message*/
-        if(sread(&c, 1, 1, target) == 0) break;
+        if(csread(&c, 1, 1, target) == 0) break;
         //Syntax check
         if(c != 1){
             sprintf(err, "Failed to read chat from stream: corrupted syntax (no HEAD)");
@@ -28,9 +22,9 @@ struct MessageList loadMLFromStream(const char *target){
             return me;
         }
         struct Message sub = makeMes("", 0);
-        sread(&sub.userid, sizeof(sub.userid), 1, target);
-        sread(&sub.date, sizeof(sub.date), 1, target);
-        sread(&c, 1, 1, target);
+        csread(&sub.userid, sizeof(sub.userid), 1, target);
+        csread(&sub.date, sizeof(sub.date), 1, target);
+        csread(&c, 1, 1, target);
         //Syntax check
         if(c!=2){
             sprintf(err, "Failed to read chat from stream: corrupted syntax (no BODY-START)");
@@ -38,10 +32,10 @@ struct MessageList loadMLFromStream(const char *target){
             return me;
         }
         sprintf(mesBuf, "\0");
-        sread(&c, 1, 1, target);
+        csread(&c, 1, 1, target);
         do{
             sprintf(mesBuf, "%s%c", mesBuf, c);
-            if(sread(&c, 1, 1, target) == 0) break;
+            if(csread(&c, 1, 1, target) == 0) break;
         }while(c!=3);
         sprintf(mesBuf, "%s%c", mesBuf, 0);
         sub.content = (char*)malloc(strlen(mesBuf));
@@ -51,17 +45,14 @@ struct MessageList loadMLFromStream(const char *target){
     free(mesBuf);
     return me;
 }
-struct UserList loadULFromStream(const char *target){
+struct UserList loadULFromStream(const char *str){
+    struct NCStream target = makeStream(str, strlen(str));
     struct UserList me = initUserList();
-    if(target == 0x0){
-        printf("Failed to open stream cuz it's NULL (reading MessageList)\n");
-        return me;
-    }
     char *name = (char*)malloc(32);
     for(int i = 0; i < 32; i++)
         name[i] = 0;
     char c = 0;
-    while(sread(&c, 1, 1, target)){
+    while(csread(&c, 1, 1, target)){
         if(c == '\n'){
             if(*name != 0)
                 if(strcmp(name, "system")) pushUserToUL(name, &me);
@@ -72,19 +63,16 @@ struct UserList loadULFromStream(const char *target){
     }
     return me;
 }
-struct Roler loadRolerFromStream(const char *target){
+struct Roler loadRolerFromStream(const char *str){
+    struct NCStream target = makeStream(str, strlen(str));
     struct Roler me = initRoler();
-    if(target == 0x0){
-        fprintf(stderr, "Failed to open stream cuz it's NULL (reading Roler)\n");
-        return me;
-    }
     char c = 0, *name = (char*)malloc(32);
     for(long roleid = 0; ; roleid++){
         struct Role this;
         // if(fread(&c, 1, 1, target) == 0) return me;
         // else fseek(target, SEEK_CUR-1, 0);
         for(int i = 0; c != '\t'; i++){
-            if(sread(&c, 1, 1, target) == 0) return me;
+            if(csread(&c, 1, 1, target) == 0) return me;
             else if(i >= 32){
                 fprintf(stderr, "Fatal error: invelid syntax in %p stream. rolename is too long (should be less then 32)\n", target);
             }
@@ -99,24 +87,24 @@ struct Roler loadRolerFromStream(const char *target){
             fprintf(stderr, "Fatal error: invelid syntax in %p stream. \' \' is skipped, stage 0. unexpected: \'%c\'(%i)\n", target, c, c);
             return initRoler();
         }
-        sread(&this.access, 4, 1, target);
-        sread(&c, 1, 1, target);
+        csread(&this.access, 4, 1, target);
+        csread(&c, 1, 1, target);
         if(c != '\t'){
             fprintf(stderr, "Fatal error: invelid syntax in %p stream. \' \' is skipped, stage 1. unexpected: \'%c\'(%i)\n", target, c, c);
             return initRoler();
         }
-        sread(&c, 1, 1, target);
+        csread(&c, 1, 1, target);
         if(c != '{'){
             fprintf(stderr, "Fatal error: invelid syntax in %p stream. \'{\' is skipped, stage 3. unexpected: \'%c\'(%i)\n", target, c, c);
             return initRoler();
         }
         addRole(&me, this.name, this.access);
         int read = 0;
-        while(sread(&c, 1, 1, target) != 0){ // Reading all userlinks for this role
+        while(csread(&c, 1, 1, target) != 0){ // Reading all userlinks for this role
             if(c == '}') break;
             else{
-                sseek(target, -1, SEEK_CUR);
-                sread(&read, 4, 1, target);
+                csseek(target, -1, SEEK_CUR);
+                csread(&read, 4, 1, target);
                 addUserToRole(&me, read, roleid, NULL);
             }
         }
