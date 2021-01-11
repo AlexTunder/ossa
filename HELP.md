@@ -104,11 +104,11 @@ Access system - is system of checking and merging of bits masks, so it's fast an
 | Name | Access flag | HEX view | Full bit | Description |
 | ---- | ----------- | -------- | -------- | ----------- |
 | acc_read  | 0 | 00000000 | 00000000000000000000000000000000 | Read messages on chat |
-| acc_write | 1 | 00000000 | 00000000000000000000000000000000 | Send messages to chat |
-| acc_users | 2 | 00000000 | 00000000000000000000000000000000 | Manage users (only invited/created by from access owner) |
-| acc_roler | 3 | 00000000 | 00000000000000000000000000000000 | Manage roles (everyone's roles) |
-| acc_taggi | 4 | 00000000 | 00000000000000000000000000000000 | Manage users (everyone) |
-| acc_evlog | 5 | 00000000 | 00000000000000000000000000000000 | Login as everyone |
+| acc_write | 1 | 00000001 | 00000000000000000000000000000001 | Send messages to chat |
+| acc_users | 2 | 00000002 | 00000000000000000000000000000010 | Manage users (only invited/created by from access owner) |
+| acc_roler | 3 | 00000008 | 00000000000000000000000000000100 | Manage roles (everyone's roles) |
+| acc_taggi | 4 | 0000000f | 00000000000000000000000000001000 | Manage users (everyone) |
+| acc_evlog | 5 | 0000001f | 00000000000000000000000000010000 | Login as everyone |
 ## Warning!
  - User 'system' haven't any role and access, but at the start it's have FULL access. If you will try to load chat from file/stream systme's access will dropped to **0**! Do not forget make new role ("admin", for example) for system as super-user. If you will don't do that you can block all chat for session.
  - "0" access byte is "ban" state. It's mean, if somebody randomly gets ban, he will never come back without admin's help. You just should to change access flags
