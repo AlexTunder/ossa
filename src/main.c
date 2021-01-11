@@ -7,7 +7,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <process.h>
-#include "./chat.c"
+#include "./chat.h"
 
 //CLI codes
 #define CLI_OK_NOUT 0x00f0

@@ -1,3 +1,0 @@
-struct keemo_env{
-
-};

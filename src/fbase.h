@@ -2,7 +2,9 @@
  #error TYPES_H is undefined. fbase.h declired without basic library.
 #endif
 //file
-FILE *target;
+#ifndef target
+ FILE *target;
+#endif
 //For headers
 // char crypto[16];
 

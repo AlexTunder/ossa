@@ -12,4 +12,4 @@ update-debug:
 update-o3-debug:
 	gcc src/main.c -o osmic.exe -O3 -g3 -Wall
 clean-res:
-	rm 16*
+	rm 16*	
