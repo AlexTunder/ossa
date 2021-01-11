@@ -24,6 +24,7 @@
 #define acc_roler 1<<3 /* manage rolies */
 #define acc_taggi 1<<4 /* tag anyone */
 #define acc_evlog 1<<5 /* login as everyone */
+#define h 0x1f
 
 //Global variables
 int last = 0;
@@ -246,20 +247,37 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_NAUDIO_E;
                 }
             }
-        } else if(!strcmp(comm[0], "load")){
-            if(!strcmp(comm[1], "")){
-                printf("No chat file. Use \':load [filename]\'\n");
-                return CLI_OK_NOUT;
-            }
-            printf("All current chat message will destroyed\n\tAre you sure to load? [y/N] ");
-            char a = getchar();
-            if(a == 'y' || a == 'Y'){
-                last = 0;
-                chat->messages = loadMLFromFile(comm[1]);
-                chat->userList = loadULFromFile("user.list");
-                chat->roler = loadRolerFromFile("roles.list");
-            }else printf("Aborted\n");
+    } else if(!strcmp(comm[0], "load")){
+        if(!strcmp(comm[1], "")){
+            printf("No chat file. Use \':load [filename]\'\n");
+            return CLI_OK_NOUT;
         }
+        printf("All current chat message will destroyed\n\tAre you sure to load? [y/N] ");
+        char a = getchar();
+        if(a == 'y' || a == 'Y'){
+            last = 0;
+            chat->messages = loadMLFromFile(comm[1]);
+            chat->userList = loadULFromFile("user.list");
+            chat->roler = loadRolerFromFile("roles.list");
+        }else printf("Aborted\n");
+    }else if(!strcmp(comm[0], "help")){
+        FILE *help = fopen("HELP.md", "r");
+        char *link = 0x0;
+        link = (char*)malloc(128);
+        #ifdef __WIN32
+            strcpy(link, "cmd /c start https://github.com/AlexTunder/ossa/blob/master/HELP.md");
+            strcat(link, comm[1]);
+        #endif
+        #ifdef __linux__
+            strcpy(link,"open \"https://github.com/AlexTunder/ossa/blob/master/HELP.md\"");
+            strcat(link, comm[1]);
+        #endif
+        #ifdef __APPLE
+            strcpy(link,"xdg-open \"https://github.com/AlexTunder/ossa/blob/master/HELP.md\"");
+            strcat(link, comm[1]);
+        #endif
+        system(link);
+    } 
     else {
         printf("Command \'%s\' is not found\n", comm[0]);
         return CLI_CNF;
