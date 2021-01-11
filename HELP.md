@@ -5,6 +5,7 @@ For all chat-inside commands use ':' prefix. For example: ':exit'
 
 If you want to use some shell commands from chat use '$' prefix. for example: '$ip a'
 
+For fast navigation use :help #[command]
 # Basic commands
 | Name | Syntax | Description |
 | ---- | ------ | ----------- |
