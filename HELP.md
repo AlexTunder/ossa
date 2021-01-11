@@ -22,7 +22,7 @@ For fast navigation use :help #[command]
 | :lsrole | :lsrole (role ID) | view full info about role(s). If you type just ':lsrole' it's will displayed full list of roles woth full info |
 | :set | view next pont | allow to manage roles, users, access and others. View more in next point |
 
-# Set command
+# Set
 For every of this command you should to use next structure: :set [parameter]. Every command can affect to chat working |
 ## Users
 All user's setters have next syntax:
@@ -64,7 +64,7 @@ Full table of access bits values you can see in 'access' paragraph
 You can change user permanently, withoit login if chat-ruler allow this. you shold to have 5-lvl (acc_evlog) access to do that
 
 P.S. You also can change user #0 name ("system" by default)
-# Developer commands
+# Developer
 Almost of this command needs only for debugging or testing, but users also can use it
 ## Recompile
 This command useful only if you have sources of OSMIC ION realese and 'make' with 'gcc'. Else it's will ends sad :c
@@ -100,7 +100,7 @@ Table of all configs names
 | 0 | runtime-n | Enable runtime network sync |
 | 0 | native-aud | Enable native audion support |
 
-# Access system
+# Access
 Access system - is system of checking and merging of bits masks, so it's fast and secure. Bit's position in the byte calls 'access flag'. Every action in chat requere some kind of access. You can make your own access if you want, but OSMIC also have reserved access flags. Here table of this
 | Name | Access flag | HEX view | Full bit | Description |
 | ---- | ----------- | -------- | -------- | ----------- |
