@@ -62,6 +62,7 @@ Full table of access bits values you can see in 'access' paragraph
 ## Me
 You can change user permanently, withoit login if chat-ruler allow this. you shold to have 5-lvl (acc_evlog) access to do that
 
+P.S. You also can change user #0 name ("system" by default)
 # Developer commands
 Almost of this command needs only for debugging or testing, but users also can use it
 ## Recompile
@@ -98,4 +99,17 @@ Table of all configs names
 | 0 | runtime-n | Enable runtime network sync |
 | 0 | native-aud | Enable native audion support |
 
-# Thx for attension!
+# Access system
+Access system - is system of checking and merging of bits masks, so it's fast and secure. Bit's position in the byte calls 'access flag'. Every action in chat requere some kind of access. You can make your own access if you want, but OSMIC also have reserved access flags. Here table of this
+| Name | Access flag | HEX view | Full bit | Description |
+| ---- | ----------- | -------- | -------- | ----------- |
+| acc_read  | 0 | 00000000 | 00000000000000000000000000000000 | Read messages on chat |
+| acc_write | 1 | 00000000 | 00000000000000000000000000000000 | Send messages to chat |
+| acc_users | 2 | 00000000 | 00000000000000000000000000000000 | Manage users (only invited/created by from access owner) |
+| acc_roler | 3 | 00000000 | 00000000000000000000000000000000 | Manage roles (everyone's roles) |
+| acc_taggi | 4 | 00000000 | 00000000000000000000000000000000 | Manage users (everyone) |
+| acc_evlog | 5 | 00000000 | 00000000000000000000000000000000 | Login as everyone |
+## Warning!
+ - User 'system' haven't any role and access, but at the start it's have FULL access. If you will try to load chat from file/stream systme's access will dropped to **0**! Do not forget make new role ("admin", for example) for system as super-user. If you will don't do that you can block all chat for session.
+ - "0" access byte is "ban" state. It's mean, if somebody randomly gets ban, he will never come back without admin's help. You just should to change access flags
+ - "ban" state always save user in userlist
