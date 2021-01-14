@@ -9,15 +9,10 @@
 #include <process.h>
 #include "./chat.h"
 
-//COLORS
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
-
+//ErrorsCodes
+#define NO_ERR          0
+#define NO_FILE         -1
+#define INVALID_SYNTAX  -2
 //CLI codes
 #define CLI_OK_NOUT 0x00f0
 #define CLI_OK_DROP 0x00f1
@@ -33,10 +28,206 @@
 #define acc_roler 1<<3 /* manage rolies */
 #define acc_taggi 1<<4 /* tag anyone */
 #define acc_evlog 1<<5 /* login as everyone */
-#define h 0x1f
+//COLORS
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
 
 //Global variables
 int last = 0;
+
+struct langMap{
+    /* logic */
+    struct LANMAP_LOGIC{ char
+        *yes,
+        *no;
+    }logic;
+    /* No access strings */
+    struct LANMAP_ERR_ACC{ char
+        *no_acc_users,
+        *no_acc_evlog,
+        *no_acc_roler,
+        *muted,
+        *ban;
+    }access;
+    /* Table titles */
+    struct LANMAP_TITLES{ char
+        *total,
+        *name,
+        *memory,
+        *role_name,
+        *access_code,
+        *access_number;
+    }titles;
+    /* error */
+    struct LANMAP_ERR{ char
+        *bad_set,
+        *invalid_syntax,
+        *no_chat_file,
+        *command_not_found,
+        *command_error;
+    }error;
+    /* ok output */
+    struct LANMAP_OK{ char
+        *user_in_role,
+        *chat_load_are_you_sure,
+        *exit,
+        *aborted,
+        *sended,
+        *welcome;
+    }output;
+}strStorage;
+
+char *readLineFromFile(FILE *file, int *size){
+    char c = 0,
+    /* double buffering, cuz we don't know size of word */
+    *buffer1 = 0x0,
+    *buffer2 = 0x0;
+    int i = 0;
+
+    //MAGIC HERE!
+    buffer1 = (char*)malloc(1);
+    *buffer1 = 0;
+    buffer2 = (char*)malloc(1);
+    *buffer2 = 0;
+
+    for(; fread(&c, 1, 1, file) != 0; i++){
+        if(c == '\n' || c == '\r')
+            break;
+        if(i%2 == 0){
+            free(buffer1);
+            buffer1 = (char*)malloc(i+2);
+            sprintf(buffer1, "%s%c", buffer2, c);
+        }else{
+            free(buffer2);
+            buffer2 = (char*)malloc(i+2);
+            sprintf(buffer2, "%s%c", buffer1, c);
+        }
+        printf("====== %i ======\nBuffer 1: %s\nBuffer 2: %s\n",i, buffer1, buffer2);
+    }
+
+    if(size != 0x0)
+        *size = i;
+    if(strlen(buffer1) > strlen(buffer2))
+        {free(buffer2);return buffer1;}
+    else 
+        {free(buffer1);return buffer2;}
+}
+
+int loadLMFromFile(const char *path, struct langMap *lm){
+    FILE *target = fopen(path, "r");
+    if(target == 0x0){
+        return NO_FILE;
+    }
+    char buffer[1024];
+    while(fscanf(target, "%1023s", buffer) == 1){
+        if(!strcmp(buffer, "yes")){ /* logic */
+            if((strStorage.logic.yes = readLineFromFile(target, 0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "no")){
+            if((strStorage.logic.no = readLineFromFile(target, 0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "no_acc_users")){ /* access */
+            if((strStorage.access.no_acc_users = readLineFromFile(target, 0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "no_acc_evlog")){
+            if((strStorage.access.no_acc_evlog = readLineFromFile(target, 0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "no_acc_roler")){
+            if((strStorage.access.no_acc_roler = readLineFromFile(target, 0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "muted")){
+            if((strStorage.access.muted = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "ban")){
+            if((strStorage.access.ban = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "total")){ /* titles */
+            if((strStorage.titles.total = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "name")){
+            if((strStorage.titles.name = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "memory")){
+            if((strStorage.titles.memory = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "role_name")){
+            if((strStorage.titles.role_name = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "access_code")){
+            if((strStorage.titles.access_code = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "access_number")){
+            if((strStorage.titles.access_number = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "bad_set")){ /* errors */
+            if((strStorage.error.bad_set = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "invalid_syntax")){
+            if((strStorage.error.invalid_syntax = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "no_chat_file")){
+            if((strStorage.error.no_chat_file = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "command_not_found")){
+            if((strStorage.error.command_not_found = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "command_error")){
+            if((strStorage.error.command_error = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "user_in_role")){ /* outputs */
+            if((strStorage.output.user_in_role = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "chat_load")){
+            if((strStorage.output.chat_load_are_you_sure = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "exit")){
+            if((strStorage.output.exit = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "aborted")){
+            if((strStorage.output.aborted = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "sended")){
+            if((strStorage.output.sended = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else if(!strcmp(buffer, "welcome")){
+            if((strStorage.output.welcome = readLineFromFile(target, 0x0)) == 0)
+                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
+            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+        }else{
+            printf("%s%s (Unexpected ID - \"%s\")\'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, buffer, path, ANSI_COLOR_RESET);
+        }
+    }
+    printf("[*] Loading finished\n");
+    return 0;
+}
 
 int handleCommand(char comm[32][16], struct Chat *chat, int *me){
     if(!strcmp(comm[0], "exit") || !strcmp(comm[0], "q"))
@@ -61,7 +252,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 if(strcmp(comm[1], "\0"))
                     return pushUser(comm[1], chat);
         }
-        else printf(ANSI_COLOR_RED"You haven't permission to this command. You need \'acc_users\' permission flag.\n"ANSI_COLOR_RESET);
+        else printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_users, ANSI_COLOR_RESET);
         return CLI_OK_NOUT;
     } else if(!strcmp(comm[0], "lsuser")){
         int max = getUsersCount(chat);
@@ -78,7 +269,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     return CLI_OK_NOUT;
                 }
             }else{
-                printf(ANSI_COLOR_RED"No permission. Get \'acc_evlog\' flag for login as everyone of users or use \':login [userid] [password]\'\n"ANSI_COLOR_RESET);
+                printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_evlog, ANSI_COLOR_RESET);
                 return CLI_NOPERM;
             }
         }else if(!strcmp(comm[1], "user")){
@@ -88,26 +279,26 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, atoi(comm[4]), &chat->userList);
                     else{
-                        printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
+                        printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
                     }
                 } else if(!strcmp(comm[3], "ban")){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, 0, &chat->userList);
                     else{
-                        printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
+                        printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
                     }
                 } else if(!strcmp(comm[3], "name")){
                     struct UserList *counter = &chat->userList;
                     int i = 0;
                     do{
-                    counter = counter->next; 
+                        counter = counter->next; 
                     }while(counter->next != NULL && i < target);
                     free(counter->name);
                     counter->name = (char*)malloc(strlen(comm[4]));
                     strcpy(counter->name, comm[4]);
                 }
             }else{
-                printf(ANSI_COLOR_RED"You should to have \'acc_users\' permission flag do do that\n"ANSI_COLOR_RESET);
+                printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_users, ANSI_COLOR_RESET);
             }
         }else if(!strcmp(comm[1], "role")){
             if(getUserAccess(*me, &chat->userList) & acc_roler){
@@ -120,13 +311,13 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     }
                 }
             }else{
-                printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
+                printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
             }
         }
         else {printf("bad \'set\' parameter (%s)\n", comm[1]);return CLI_CNF;}
     } else if(!strcmp(comm[0], "view")){
         if(!(getUserAccess(me, &chat->userList) & 0b01)){
-            printf(ANSI_COLOR_RED"You was banned for reading. Contact with admin for solve this\n"ANSI_COLOR_RESET);
+            printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.ban, ANSI_COLOR_RESET);
             return CLI_NOPERM;
         }
         if(!strcmp(comm[1], "all")){
@@ -135,7 +326,8 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             last = getMessagesCount(chat) - atoi(comm[2]);
         }
     } else if(!strcmp(comm[0], "lsrole")){
-        printf("ID\tMemory\t\t\tRole name\tAccess code\tAccess number\n");
+        // printf("ID\tMemory\t\t\tRole name\tAccess code\tAccess number\n");
+        printf("ID\t%s\t\t\t%s\t%s\t%s\n", strStorage.titles.memory, strStorage.titles.role_name, strStorage.titles.access_code, strStorage.titles.access_number);
         if (strcmp(comm[1], "")){
             int index = atoi(comm[2]);
             printf("%i\t%p\t%s\t%x\t%i\n", index, getRoleByIndex(&chat->roler, index), getRoleByIndex(&chat->roler, index)->name, getRoleByIndex(&chat->roler, index)->access, getRoleByIndex(&chat->roler, index)->access);
@@ -148,7 +340,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         if(getUserAccess(*me, &chat->userList) & acc_roler)
             addRole(&chat->roler, comm[1], 0);
         else{
-            printf(ANSI_COLOR_RED"You should to have \'acc_roler\' permission flag do do that\n"ANSI_COLOR_RESET);
+            printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
         }
     } else if(!strcmp(comm[0], "recompile")){
         char settings = 0; //1 bit = basic, 2 bit = updater, 3 bit = norun, 4 - main only
@@ -200,10 +392,10 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         int user_id = atoi(comm[1]);
         int role_id = atoi(comm[2]);
         if(getRoleByIndex(&chat->roler, role_id) != NULL){
-            printf("(%i)%s user in role (%i)%s: ", user_id, getUsernameByID(user_id, &chat->userList), role_id, getRoleByIndex(&chat->roler, role_id)->name);
+            printf("(%i)%s %s (%i)%s: ", user_id, getUsernameByID(user_id, &chat->userList), strStorage.output.user_in_role, role_id, getRoleByIndex(&chat->roler, role_id)->name);
             if(checkInRole(getRoleByIndex(&chat->roler, role_id), user_id))
-                printf("YES\n");
-            else printf("NO\n");
+                printf("%s\n", strStorage.logic.yes);
+            else printf("%s\n", strStorage.logic.no);
         }
     } else if(!strcmp(comm[0], "ban")){
         int user_id = atoi(comm[1]);
@@ -262,17 +454,17 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             }
     } else if(!strcmp(comm[0], "load")){
         if(!strcmp(comm[1], "")){
-            printf("No chat file. Use \':load [filename]\'\n");
+            printf("%s \':load [filename]\'\n", strStorage.error.no_chat_file);
             return CLI_OK_NOUT;
         }
-        printf("All current chat message will destroyed\n\tAre you sure to load? [y/N] ");
+        printf("%s [y/N] ", strStorage.output.chat_load_are_you_sure);
         char a = getchar();
         if(a == 'y' || a == 'Y'){
             last = 0;
             chat->messages = loadMLFromFile(comm[1]);
             chat->userList = loadULFromFile("user.list");
             chat->roler = loadRolerFromFile("roles.list");
-        }else printf("Aborted\n");
+        }else printf("%s\n", strStorage.output.aborted);
     }else if(!strcmp(comm[0], "help")){
         FILE *help = fopen("HELP.md", "r");
         char *link = 0x0;
@@ -310,7 +502,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }
     }
     else {
-        printf("Command \'%s\' is not found\n", comm[0]);
+        printf("%s (\'%s\')\n", strStorage.error.command_not_found, comm[0]);
         return CLI_CNF;
     }
     return 0;
@@ -357,7 +549,7 @@ int handleCLI(struct Chat *chat, int *me){
             else input[++counter] = c;
         }while(c != '\n');
         if(!(getUserAccess(me, &chat->userList) & 0b10)){
-            printf(ANSI_COLOR_RED"You are mutted. Contant with admin of chat to solve this (your access: %p)\n"ANSI_COLOR_RESET, getUserAccess(me, &chat->userList));
+            printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.muted, ANSI_COLOR_RESET);
             return CLI_NOPERM;
         }
         pushMessage(makeMes(input, *me), chat);
@@ -367,6 +559,8 @@ int handleCLI(struct Chat *chat, int *me){
 } 
 
 int main(int argc, char **argv){
+    printf("Loading your default language...\n");
+    loadLMFromFile("default.lang", &strStorage);
     for(int i = 0; i < argc; i++){
         if(!strcmp(argv[i], "killUpdater")){
             char *toKill = (char*)malloc(1024);
@@ -375,7 +569,7 @@ int main(int argc, char **argv){
             system(toKill);
         }
     }
-    printf("========Welcome to Open Source Minimal In-line Chat (OSMIC)!========\n");
+    printf("%s\n", strStorage.output.welcome); //Welcome!
    int me = 0;
    struct Chat chat = initChat(NULL);
    chat.userList.access = 0xffffffff;
@@ -385,7 +579,7 @@ int main(int argc, char **argv){
    while(1){
     for(int i = last; i < getMessagesCount(&chat); i++){
             struct Message mes = getMessage(&chat, i); 
-            printf("(%i)%s@[system]: %s\n\tsended:<%I64i>\n", i, getUsernameByID(mes.userid, &chat.userList), mes.content, mes.date);
+            printf("(%i)%s@[system]: %s\n\t%s:<%I64i>\n", i, getUsernameByID(mes.userid, &chat.userList), mes.content, strStorage.output.sended ,mes.date);
             last = i+1;
             if(last == getMessagesCount(&chat)) printf("\n");
     }
@@ -393,7 +587,7 @@ int main(int argc, char **argv){
     int code = handleCLI(&chat, &me);
     if(code < CLI_ERRF) last ++;
     else if(code == CLI_EXIT){
-        printf("Exit...\n");
+        printf("%s\n", strStorage.output.exit);
         break;
     }else if(code == CLI_ERRF){
         printf("Fail: command error. Check all commands\n");
