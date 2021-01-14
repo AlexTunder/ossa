@@ -98,6 +98,7 @@ char *readLineFromFile(FILE *file, int *size){
 int loadLMFromFile(const char *path, struct langMap *lm){
     FILE *target = fopen(path, "r");
     if(target == 0x0){
+        printf("[!]%s%s \'%s\'%s\n", ANSI_COLOR_RED, "No language package. Entering (nulli-a) mode. download file from link below:\n\t", path, ANSI_COLOR_RESET"https://github.com/AlexTunder/ossa/blob/master/default.lang\n");
         return NO_FILE;
     }
     char buffer[1024];
