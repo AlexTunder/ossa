@@ -368,17 +368,23 @@ int handleCLI(struct Chat *chat, int *me){
 } 
 
 int main(int argc, char **argv){
+    /* default settings */
+    char *langPath = (char*)malloc(_MAX_PATH);
+    sprintf(langPath, "default.lang");
+    /* parsing arguments */
     for(int i = 0; i < argc; i++){
         if(!strcmp(argv[i], "killUpdater")){
             char *toKill = (char*)malloc(1024);
             sprintf(toKill, "powershell Stop-Process -Name \"%s\" -Force", argv[i+1]);
             printf("[*]Killing updater proccess...\n");
             system(toKill);
+        }else if(!strcmp(argv[i], "--lang")){
+            sprintf(langPath, "./languages/%s.lang", argv[++i]);
         }
     }
-    printf("Loading your default language...\n");
-    loadLMFromFile("default.lang", &strStorage);
+    loadLMFromFile(langPath, &strStorage);
     printf("%s\n", strStorage.output.welcome); //Welcome!
+    /* main code */
    int me = 0;
    struct Chat chat = initChat(NULL);
    chat.userList.access = 0xffffffff;
