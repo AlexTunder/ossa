@@ -57,6 +57,13 @@ struct langMap{
         *sended,
         *welcome;
     }output;
+    /* low-level details */
+    struct LMMAP{
+        char *locale;
+        void (*callback_load)(const char *target);
+        void (*callback_fail)(const char *target, int reason);
+        void (*callback_finish)(int total);
+    }details;
 }strStorage;
 
 char *readLineFromFile(FILE *file, int *size){
@@ -102,107 +109,167 @@ int loadLMFromFile(const char *path, struct langMap *lm){
         return NO_FILE;
     }
     char buffer[1024];
+    int counter = 0;
     while(fscanf(target, "%1023s", buffer) == 1){
         if(!strcmp(buffer, "yes")){ /* logic */
-            if((strStorage.logic.yes = readLineFromFile(target, 0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->logic.yes = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("yes", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("lm->logic.yes");
         }else if(!strcmp(buffer, "no")){
-            if((strStorage.logic.no = readLineFromFile(target, 0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.no\" loaded.\n");
+            if((lm->logic.no = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("no", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("lm->logic.no");
         }else if(!strcmp(buffer, "no_acc_users")){ /* access */
-            if((strStorage.access.no_acc_users = readLineFromFile(target, 0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->access.no_acc_users = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("no_acc_users", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("lm->access.no_acc_users");
         }else if(!strcmp(buffer, "no_acc_evlog")){
-            if((strStorage.access.no_acc_evlog = readLineFromFile(target, 0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->access.no_acc_evlog = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("no_acc_evlog", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("no_acc_evlog");
         }else if(!strcmp(buffer, "no_acc_roler")){
-            if((strStorage.access.no_acc_roler = readLineFromFile(target, 0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->access.no_acc_roler = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("no_acc_roler", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("no_acc_roler");
         }else if(!strcmp(buffer, "muted")){
-            if((strStorage.access.muted = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->access.muted = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("mutes", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("access.mutes");
         }else if(!strcmp(buffer, "ban")){
-            if((strStorage.access.ban = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->access.ban = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("ban", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("access.ban");
         }else if(!strcmp(buffer, "total")){ /* titles */
-            if((strStorage.titles.total = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->titles.total = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("total", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("titles.total");
         }else if(!strcmp(buffer, "name")){
-            if((strStorage.titles.name = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->titles.name = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("names", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("titles.name");
         }else if(!strcmp(buffer, "memory")){
-            if((strStorage.titles.memory = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->titles.memory = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("memory", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("titles.memory");
         }else if(!strcmp(buffer, "role_name")){
-            if((strStorage.titles.role_name = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->titles.role_name = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("role_name", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("titles.role_name");
         }else if(!strcmp(buffer, "access_code")){
-            if((strStorage.titles.access_code = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->titles.access_code = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("access_code", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("titles.access_code");
         }else if(!strcmp(buffer, "access_number")){
-            if((strStorage.titles.access_number = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->titles.access_number = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("titles.access_number", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("titles.access_number");
         }else if(!strcmp(buffer, "bad_set")){ /* errors */
-            if((strStorage.error.bad_set = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->error.bad_set = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("errors.bad_set", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("errors.bad_set");
         }else if(!strcmp(buffer, "invalid_syntax")){
-            if((strStorage.error.invalid_syntax = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->error.invalid_syntax = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("errors.invalid_syntax", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("errors.invalid_syntax");
         }else if(!strcmp(buffer, "no_chat_file")){
-            if((strStorage.error.no_chat_file = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->error.no_chat_file = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("errors.no_chat_file", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("errors.no_chat_file");
         }else if(!strcmp(buffer, "command_not_found")){
-            if((strStorage.error.command_not_found = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->error.command_not_found = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("errors.command_not_found", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("errors.command_not_found");
         }else if(!strcmp(buffer, "command_error")){
-            if((strStorage.error.command_error = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->error.command_error = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("errors.command_error", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("errors.command_errors");
         }else if(!strcmp(buffer, "user_in_role")){ /* outputs */
-            if((strStorage.output.user_in_role = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->output.user_in_role = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("output.user_in_role", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("output.user_in_role");
         }else if(!strcmp(buffer, "chat_load")){
-            if((strStorage.output.chat_load_are_you_sure = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->output.chat_load_are_you_sure = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("output.chat_load", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("output.chat_load");
         }else if(!strcmp(buffer, "exit")){
-            if((strStorage.output.exit = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->output.exit = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("output.exit", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("output.exit");
         }else if(!strcmp(buffer, "aborted")){
-            if((strStorage.output.aborted = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->output.aborted = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("output.aborted", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("output.aborted");
         }else if(!strcmp(buffer, "sended")){
-            if((strStorage.output.sended = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
+            if((lm->output.sended = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("output.sended", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("output.sended");
         }else if(!strcmp(buffer, "welcome")){
-            if((strStorage.output.welcome = readLineFromFile(target, 0x0)) == 0)
-                printf("%s%s \'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, path, ANSI_COLOR_RESET);
-            printf("[*] \"strStorage.logic.yes\" loaded.\n");
-        }else{
-            printf("%s%s (Unexpected ID - \"%s\")\'%s\'%s\n", ANSI_COLOR_RED, strStorage.error.invalid_syntax, buffer, path, ANSI_COLOR_RESET);
+            if((lm->output.welcome = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("output.welcome", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("output.welcome");
+        }else if(!strcmp(buffer, "locale")){
+            if((lm->details.locale = readLineFromFile(target, 0)) == 0)
+                if(lm->details.callback_fail != 0x0)
+                    lm->details.callback_fail("locale", INVALID_SYNTAX);
+            if(lm->details.callback_load != 0x0)
+                lm->details.callback_load("details.locale");
         }
+        else{
+            if(lm->details.callback_fail != 0x0)
+                lm->details.callback_fail("main", INVALID_SYNTAX);
+            return counter;
+        }
+        counter++;
     }
-    printf("[*] Loading finished\n");
-    return 0;
+    if(lm->details.callback_finish != 0x0)
+        lm->details.callback_finish(counter);
+    return counter;
 }

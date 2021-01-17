@@ -368,8 +368,6 @@ int handleCLI(struct Chat *chat, int *me){
 } 
 
 int main(int argc, char **argv){
-    printf("Loading your default language...\n");
-    loadLMFromFile("default.lang", &strStorage);
     for(int i = 0; i < argc; i++){
         if(!strcmp(argv[i], "killUpdater")){
             char *toKill = (char*)malloc(1024);
@@ -378,6 +376,8 @@ int main(int argc, char **argv){
             system(toKill);
         }
     }
+    printf("Loading your default language...\n");
+    loadLMFromFile("default.lang", &strStorage);
     printf("%s\n", strStorage.output.welcome); //Welcome!
    int me = 0;
    struct Chat chat = initChat(NULL);
