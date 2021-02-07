@@ -1,1 +1,9 @@
 *.exe
+*.out
+src/tests/test
+example.chat
+roles.list
+users.list
+*.log
+*.kdb
+.vscode
