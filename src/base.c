@@ -20,7 +20,7 @@ struct Message makeMes(const char *body, int userid){
         content = (char*)malloc(strlen(body));
         strcpy(content, body);
     }else content = NULL;
-    struct Message mes = {content, time(NULL), userid};
+    struct Message mes = {content, time(0), userid};
     return mes;
 }
 struct UserList initUserList(){

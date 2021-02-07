@@ -1,0 +1,23 @@
+locale pl_PL.utf8
+yes tak
+no nie
+no_acc_users Nie masz dostępu do user-managment'a
+no_acc_evlog Nie możesz zaloguj się jako inny użytkownik
+no_acc_roler Nie możesz pracować z rolemi
+total całkowity
+name imię
+memory pamięć
+role_name imię roli
+access_code kod dostępu
+access_number numer dostępu
+bad_set attribut parametru 'set' jest niepoprawny
+invalid_syntax składnia jest nioprawny
+no_chat_file czat nie jest znaleziony
+command_error bląd komandy
+command_not_found komanda nie jest znaleziony
+user_in_role użytkownik nie jest w roli
+chat_load po ukończeniu się ładowania wszystkie chat będzie zniszczonyю jesteś pewnie?
+exit Wyloguj się...
+aborted Anulowano...
+sended przesłano:
+welcome ========== Witaj do OPKARC! ==========

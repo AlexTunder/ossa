@@ -1,4 +1,6 @@
 #pragma once
+#include <wchar.h>
+#include <string.h>
 #ifndef fprintf
  #include <stdio.h>
 #endif
@@ -17,14 +19,14 @@
     #define ANSI_COLOR_CYAN    "\x1b[36m"
     #define ANSI_COLOR_RESET   "\x1b[0m"
 #endif
-struct langMap{
+struct LangMap{
     /* logic */
-    struct LANMAP_LOGIC{ char
+    struct LANMAP_LOGIC{ unsigned char
         *yes,
         *no;
     }logic;
     /* No access strings */
-    struct LANMAP_ERR_ACC{ char
+    struct LANMAP_ERR_ACC{ unsigned char
         *no_acc_users,
         *no_acc_evlog,
         *no_acc_roler,
@@ -32,7 +34,7 @@ struct langMap{
         *ban;
     }access;
     /* Table titles */
-    struct LANMAP_TITLES{ char
+    struct LANMAP_TITLES{ unsigned char
         *total,
         *name,
         *memory,
@@ -41,7 +43,7 @@ struct langMap{
         *access_number;
     }titles;
     /* error */
-    struct LANMAP_ERR{ char
+    struct LANMAP_ERR{ unsigned char
         *bad_set,
         *invalid_syntax,
         *no_chat_file,
@@ -49,7 +51,7 @@ struct langMap{
         *command_error;
     }error;
     /* ok output */
-    struct LANMAP_OK{ char
+    struct LANMAP_OK{ unsigned char
         *user_in_role,
         *chat_load_are_you_sure,
         *exit,
@@ -59,37 +61,37 @@ struct langMap{
     }output;
     /* low-level details */
     struct LMMAP{
-        char *locale;
+        unsigned char *locale;
         void (*callback_load)(const char *target);
         void (*callback_fail)(const char *target, int reason);
         void (*callback_finish)(int total);
     }details;
-}strStorage;
+};
 
 char *readLineFromFile(FILE *file, int *size){
-    char c = 0,
+    unsigned char c = 0; char
     /* double buffering, cuz we don't know size of word */
     *buffer1 = 0x0,
     *buffer2 = 0x0;
     int i = 0;
 
     //MAGIC HERE!
-    buffer1 = (char*)malloc(1);
+    buffer1 = (char*)malloc(sizeof(char));
     *buffer1 = 0;
-    buffer2 = (char*)malloc(1);
+    buffer2 = (char*)malloc(sizeof(char));
     *buffer2 = 0;
 
     for(; fread(&c, 1, 1, file) != 0; i++){
         if(c == '\n' || c == '\r')
             break;
-        if(i%2 == 0){
-            free(buffer1);
-            buffer1 = (char*)malloc(i+2);
-            sprintf(buffer1, "%s%c", buffer2, c);
-        }else{
+        if(strlen(buffer1) > strlen(buffer2)){
             free(buffer2);
-            buffer2 = (char*)malloc(i+2);
+            buffer2 = (char*)malloc(strlen(buffer1)+2);
             sprintf(buffer2, "%s%c", buffer1, c);
+        }else{
+            free(buffer1);
+            buffer1 = (char*)malloc(strlen(buffer2)+2);
+            sprintf(buffer1, "%s%c", buffer2, c);
         }
         // printf("====== %i ======\nBuffer 1: %s\nBuffer 2: %s\n",i, buffer1, buffer2);
     }
@@ -102,7 +104,7 @@ char *readLineFromFile(FILE *file, int *size){
         {free(buffer1);return buffer2;}
 }
 
-int loadLMFromFile(const char *path, struct langMap *lm){
+int loadLMFromFile(const char *path, struct LangMap *lm){
     FILE *target = fopen(path, "r");
     if(target == 0x0){
         printf("[!]%s%s \'%s\'%s\n", ANSI_COLOR_RED, "No language package. Entering (nulli-a) mode. download file from link below:\n\t", path, ANSI_COLOR_RESET"https://github.com/AlexTunder/ossa/blob/master/default.lang\n");
@@ -111,6 +113,7 @@ int loadLMFromFile(const char *path, struct langMap *lm){
     char buffer[1024];
     int counter = 0;
     while(fscanf(target, "%1023s", buffer) == 1){
+        fseek(target, 1, SEEK_CUR);
         if(!strcmp(buffer, "yes")){ /* logic */
             if((lm->logic.yes = readLineFromFile(target, 0)) == 0)
                 if(lm->details.callback_fail != 0x0)
@@ -256,7 +259,9 @@ int loadLMFromFile(const char *path, struct langMap *lm){
             if(lm->details.callback_load != 0x0)
                 lm->details.callback_load("output.welcome");
         }else if(!strcmp(buffer, "locale")){
-            if((lm->details.locale = readLineFromFile(target, 0)) == 0)
+            lm->details.locale = (char*) malloc(1024);
+            fscanf(target, "%1024s", lm->details.locale);
+            if(*lm->details.locale == 0x0)
                 if(lm->details.callback_fail != 0x0)
                     lm->details.callback_fail("locale", INVALID_SYNTAX);
             if(lm->details.callback_load != 0x0)
