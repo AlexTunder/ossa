@@ -67,6 +67,14 @@ struct LangMap{
         void (*callback_finish)(int total);
     }details;
 };
+struct DynamicLanguageMapFragment{
+    char *fieldname, *translation;
+    struct DynamicLanguageMapFragment *next;
+};
+struct DynamicLanguageMap{
+    struct DynamicLanguageMapFragment *data;
+    void (*callback)(int type, const char *description);
+};
 
 char *readLineFromFile(FILE *file, int *size){
     unsigned char c = 0; char
@@ -102,6 +110,84 @@ char *readLineFromFile(FILE *file, int *size){
         {free(buffer2);return buffer1;}
     else 
         {free(buffer1);return buffer2;}
+}
+
+/***
+ @param dlm 
+ structure
+ @param fieldname 
+ name for original word/phrase
+ @param translation 
+ translation of original word/phrase
+ @return int 
+ Count of insertion
+ */
+int dlmfPushTranslation(struct DynamicLanguageMapFragment *dlm, const char *fieldname, const char *translation){
+    if(dlm->next == 0x0){
+        dlm->next = (struct DynamicLanguageMapFragment*)malloc(sizeof(struct DynamicLanguageMapFragment));
+        dlm->next->next = 0x0;
+        dlm->next->fieldname = (char*)malloc(strlen(fieldname));
+        dlm->next->translation = (char*)malloc(strlen(translation));
+        strcpy(dlm->next->fieldname, fieldname);
+        strcpy(dlm->next->translation, translation);
+        return 1;
+    }else return dlmfPushTranslation(dlm->next, fieldname, translation) + 1;
+}
+int dlmfLinkTranslation(struct DynamicLanguageMapFragment *dlm, const char *fieldname, char *translation){
+    if(dlm->next == 0x0){
+        dlm->next = (struct DynamicLanguageMapFragment*)malloc(sizeof(struct DynamicLanguageMapFragment));
+        dlm->next->next = 0x0;
+        dlm->next->fieldname = (char*)malloc(strlen(fieldname));
+        strcpy(dlm->next->fieldname, fieldname);
+        dlm->next->translation = translation;
+        return 1;
+    }else return dlmfLinkTranslation(dlm->next, fieldname, translation) + 1;
+}
+int dlmDelTranslation(struct DynamicLanguageMap *dlm, const char *fieldname){
+
+}
+char *dlmfGetTranslation(struct DynamicLanguageMapFragment *dlm, const char *fieldname){
+    if(!strcmp(dlm->fieldname, fieldname))
+        return dlm->fieldname;
+    else if(dlm->next != 0x0)
+        return dlmfGetTranslation(dlm->next, fieldname);
+    else return 0x0;
+}
+struct DynamicLanguageMapFragment *dlmfDLMFnByIndex(struct DynamicLanguageMapFragment *dlm, int index){
+    if(index == 0)
+        return dlm;
+    else if(dlm->next != 0x0)
+        return dlmfDLMFnByIndex(dlm->next, index-1);
+    else
+        return 0x0;
+}
+char *dlmGetTranslation(struct DynamicLanguageMap *dlm, const char *fieldname){
+    return dlmfGetTranslation(dlm->data, fieldname);
+}
+struct DynamicLanguageMapFragment *dlmGetTranslationByIndex(struct DynamicLanguageMap *dlm, int index){
+    return dlmfDLMFnByIndex(dlm->data, index);
+}
+
+int loadDLMFromFile(const char *path, struct DynamicLanguageMap *dlm){
+    FILE *target = fopen(path, "r");
+    if(target == 0x0){
+        printf("[!]%s%s \'%s\'%s\n", ANSI_COLOR_RED, "No language package. Entering (nulli-a) mode. download file from link below:\n\t", path, ANSI_COLOR_RESET"https://github.com/AlexTunder/ossa/blob/master/default.lang\n");
+        return NO_FILE;
+    }
+    char buffer[1024];
+    int counter = 0;
+    while(fscanf(target, "%1023s", buffer) == 1){
+        counter++;
+        fseek(target, 1, SEEK_CUR);
+        if(dlm->data == 0x0){
+            char *first = (char*)malloc(strlen(buffer));
+            strcpy(first, buffer);
+            dlm->data = (struct DynamicLanguageMapFragment*)malloc(sizeof(struct DynamicLanguageMapFragment));
+            *dlm->data = (struct DynamicLanguageMapFragment){first, readLineFromFile(target, 0x0)};
+        }else
+            dlmfPushTranslation(dlm->data, buffer, readLineFromFile(target, 0x0));
+    }
+    return counter;
 }
 
 int loadLMFromFile(const char *path, struct LangMap *lm){

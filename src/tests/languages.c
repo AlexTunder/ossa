@@ -6,7 +6,7 @@
 #include "../base.c"
 #include "../languages.c"
 
-struct LangMap langmap;
+struct DynamicLanguageMap dlm = {0x0, 0x0};
 
 void callback_load(const char *target){
     printf("[*]loaded: %s\n", target);
@@ -17,14 +17,12 @@ void callback_fail(const char *target, int code){
 
 int main(){
     char *lcl = setlocale(LC_ALL, "");
-    printf("Привет, cześć! Локаль: %s\n", lcl);
-    fwide(stdout, 1);
-    langmap.details.callback_load = callback_load;
-    langmap.details.callback_fail = callback_fail;
-    int loaded  = loadLMFromFile("../../languages/pl.lang", &langmap);
-    printf("loaded data: %i\n", loaded);
-    setlocale(LC_ALL, (char*)langmap.details.locale);
-    printf("langmap.details.locale: \'%s\'\n", langmap.details.locale);
-    printf("langmap.logic.yes: \'%s\'\n", (char*)langmap.logic.yes);
-    printf("langmap.logic.no: \'%s\'\n", (char*)langmap.logic.no);
+    // printf("Привет, cześć! Локаль: %s\n", lcl);
+    // fwide(stdout, 1);
+    int loaded  = loadDLMFromFile("../../languages/pl.lang", &dlm);
+    printf("loaded vars: %i\n", loaded);
+    printf("dlm.logic.yes: \'%s\'\n", dlmGetTranslation(&dlm, "yes"));
+    for(int i = 0; i < loaded; i++){
+        printf("\'%s\' translation: \'%s\'\n", dlmGetTranslationByIndex(&dlm, i)->fieldname, dlmGetTranslationByIndex(&dlm, i)->translation);
+    }
 }
