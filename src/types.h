@@ -1,4 +1,5 @@
 #pragma once
+#include <time.h>
 #ifndef TYPES_H
 #define TYPES_H
 // basic
