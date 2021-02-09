@@ -9,3 +9,5 @@ users.list
 .vscode
 bin/*
 .cache
+*.chat
+*.list
