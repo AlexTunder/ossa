@@ -1,2 +1,0 @@
-/sbin/ar qc libossa.a CMakeFiles/ossa.dir/ossa.cpp.o
-/sbin/ranlib libossa.a
