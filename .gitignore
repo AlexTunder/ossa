@@ -7,3 +7,4 @@ users.list
 *.log
 *.kdb
 .vscode
+bin/*
