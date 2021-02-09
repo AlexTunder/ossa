@@ -8,37 +8,36 @@ Open Source Social Alience
 
 ## Скачать исполняемый файл
 [Сам чат](https://drive.google.com/file/d/1a_IDv1pZulpkaI3KB8KAmspbyNlafeY_/view?usp=sharing) и
-[менеджер ресурсов](https://drive.google.com/file/d/16fniIvitGigYiTRNTXNFYnpDqnDOg7g2/view?usp=sharing)
-доступны на Google Disk
+[менеджер ресурсов](https://drive.google.com/file/d/16fniIvitGigYiTRNTXNFYnpDqnDOg7g2/view?usp=sharing) теперь доступны на Google Disk
 
 ## Фичи и новости
-- смена программы с интерфейсом: osmic переходит на иную архитектуру
-- динамическая локализация
+- Смена программы с интерфейсом: osmic переходит на иную архитектуру
+- Динамическая локализация
 
 ## Задачи на Январь/Февраль
-### Core, API
-- [x] решить баг в функции loadMLFromFile, line 175. SIGSEGV (bug issue #0001)
-- [x] допилить loadULFromFile
-- [x] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (bug issue #0002)
+### Core и API
+- [x] Решить баг в функции loadMLFromFile, line 175. SIGSEGV (bug issue #0001)
+- [x] Допилить loadULFromFile
+- [x] Решить баг в функции loadMLFromFile с ошибочными символами в начале каждого сообщения (Bug issue #0002)
 
-- [x] допилить loadRolerFromFile
-- [x] реализовать loadULFromStream
-- [x] реализовать loadMLFromStream
-- [x] реализовать loadRolerFromStream
+- [x] Допилить loadRolerFromFile
+- [x] Реализовать loadULFromStream
+- [x] Реализовать loadMLFromStream
+- [x] Реализовать loadRolerFromStream
 ### Network
 - [ ] Разработать схему объединения клиентов в блокчейн
 - [ ] Разработать алгоритм шифрования и протокол
 ### UI
-- [x] придерживаться VIM-подобного порядка комманд
-- [x] поддержка языковых пакетов
-- [ ] перейти на curses вариант
+- [x] Придерживаться VIM-подобного порядка комманд
+- [x] Поддержка языковых пакетов
+- [ ] Перейти на curses вариант
 - [ ] Сделать backdround daemon для чтения сообщений из терминала командой в терминале
 ### Languages
 - [ ] Cделать режим динамического хранения локализации
 - [ ] Runtime переводчик
 - [x] Решить баг с загрузкой языка кодом из [languages.c](src/languages.c)
 ### Extra задачи (неприоритетные)
-- [ ] сделать модуль ядра для чата
-- [ ] сделать поддержку FileStream для Linux
-- [ ] создать GUI на electron/QT5/**GTK+**/BREND
-- [ ] создать движок для своих скриптов и/или запилить поддержку JS
+- [ ] Сделать модуль ядра для чата
+- [ ] Сделать поддержку FileStream для Linux
+- [ ] Создать GUI на electron/QT5/**GTK+**/BREND
+- [ ] Создать движок для своих скриптов и/или запилить поддержку JS
