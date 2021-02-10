@@ -2,18 +2,75 @@ package main
 
 //#include "../src/types.h"
 import "C"
+import (
+	"bufio"
+	"crypto/md5"
+	"fmt"
+	"net"
+	"strconv"
+)
+
+func getMacAddr() ([]string, error) {
+	ifas, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	var as []string
+	for _, ifa := range ifas {
+		a := ifa.HardwareAddr.String()
+		if a != "" {
+			as = append(as, a)
+		}
+	}
+	return as, nil
+}
+
+type requestStage struct {
+	req   string
+	ans   string
+	ready bool
+
+	serverER error
+	serverFD net.Conn
+	serverID C.int
+}
+
+var mainStream requestStage
 
 var e C.int = 0
 
 /* Connection API */
 //export setServer
 func setServer(host *C.char, port C.int) C.int {
-	e++
-	return e
+	var fullhost string = C.GoString(host)
+	fullhost += ":" + strconv.Itoa(int(port))
+
+	mainStream.serverFD, mainStream.serverER = net.Dial("tcp", fullhost)
+
+	MAC, err := getMacAddr()
+	if err != nil {
+		return -2
+	}
+
+	if mainStream.serverER != nil {
+		return -1
+	}
+
+	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000f0010\nHardware: %v\r", MAC)
+
+	message, _ := bufio.NewReader(mainStream.serverFD).ReadString('\n')
+	if message != "OSSA-PTC: 000f0010" {
+		return -3
+	}
+
+	return 0
 }
 
 //export authServer
 func authServer(username *C.char, password *C.char) C.int {
+
+	hashPWD := md5.Sum([]byte(C.GoString(password)))
+	fmt.Printf("Using %v user with %x hash of password\n", C.GoString(username), hashPWD)
 
 	return 0
 }
@@ -26,7 +83,7 @@ func useServer(serverID C.int) C.int {
 
 //export closeServer
 func closeServer(serverID C.int) C.int {
-
+	mainStream.serverFD.Close()
 	return 0
 }
 

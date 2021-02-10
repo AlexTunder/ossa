@@ -2,7 +2,7 @@ default: updater update
 debug: updater update-debug
 o3: updater update-o3
 updater:
-	gcc additional/recompiler.c -o bin/dist -O3 -Wall
+	gcc tools/recompiler.c -o bin/dist -O3 -Wall
 update:
 	gcc src/cli/main.c -o bin/osmic -Wall
 update-o3:
