@@ -17,7 +17,8 @@ while True:
             break
         words = data.split()
         print(words)
-        if words[0] == b'OSSA-PTC: 000f0010':
-            cpnn.send("OSSA-PTC: 000f0010")
+        if words[0] == b'OSSA-PTC:':
+            conn.send(b"OSSA-PTC: 000f0010\n")
+            print('New ossa ptc-c incoming')
     conn.close()
     print(addr, 'disconnected')

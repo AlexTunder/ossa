@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 )
 
 func getMacAddr() ([]string, error) {
@@ -58,8 +59,13 @@ func setServer(host *C.char, port C.int) C.int {
 
 	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000f0010\nHardware: %v\r", MAC)
 
+	fmt.Print("Waiting for new message...")
 	message, _ := bufio.NewReader(mainStream.serverFD).ReadString('\n')
-	if message != "OSSA-PTC: 000f0010" {
+	fmt.Println(" Ready!")
+	lines := strings.Split(message, "\n")
+	words := strings.Split(lines[0], " ")
+	if words[0] != "OSSA-PTC:" {
+		fmt.Print(message)
 		return -3
 	}
 

@@ -1,6 +1,10 @@
 #pragma once
 #include "../src/types.h"
 
+#define OSSA_SERVER_CONNECTON   -1
+#define OSSA_FAILED_GET_HARDWR  -2
+#define OSSA_NET_INVALID_PROTO   -3
+
 /**         Connection API          **/
 extern int setServer(const char *hostname, int port); //Make new connection to server
 extern int authServer(const char *username, const char *pwd); //Auth in server. return your USERID
