@@ -59,9 +59,7 @@ func setServer(host *C.char, port C.int) C.int {
 
 	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000f0010\nHardware: %v\r", MAC)
 
-	fmt.Print("Waiting for new message...")
 	message, _ := bufio.NewReader(mainStream.serverFD).ReadString('\n')
-	fmt.Println(" Ready!")
 	lines := strings.Split(message, "\n")
 	words := strings.Split(lines[0], " ")
 	if words[0] != "OSSA-PTC:" {
@@ -74,11 +72,23 @@ func setServer(host *C.char, port C.int) C.int {
 
 //export authServer
 func authServer(username *C.char, password *C.char) C.int {
-
 	hashPWD := md5.Sum([]byte(C.GoString(password)))
-	fmt.Printf("Using %v user with %x hash of password\n", C.GoString(username), hashPWD)
-
-	return 0
+	// fmt.Printf("Using %v user with %x hash of password\n", C.GoString(username), hashPWD)s
+	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000f001c\nUsername: %v\nPwd-hash: %x\r", C.GoString(username), hashPWD)
+	message, _ := bufio.NewReader(mainStream.serverFD).ReadString('\n')
+	lines := strings.Split(message, "\n")
+	words := strings.Split(lines[0], " ")
+	if words[0] != "OSSA-PTC:" {
+		// fmt.Print(message)
+		return -3
+	}
+	if words[1] == "000f0a1c" {
+		words = strings.Split(lines[1], " ")
+		userid, _ := strconv.Atoi(words[1])
+		return C.int(userid)
+	} else {
+		return -4
+	}
 }
 
 //export useServer

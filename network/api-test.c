@@ -12,5 +12,10 @@ int main(){
             printf("Bad protocol syntax\n");
         }
     }
+    printf("Auth...\n");
+    returnCode = authServer("alexthunder", "apature");
+    if(returnCode == OSSA_AUTH_FAILED){
+        printf("Auth failed\n");
+    }
     closeServer(0);
 }
