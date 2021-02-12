@@ -1,4 +1,4 @@
-![Open Source Social Alience](readme-heading-01.png)
+![Open Source Social Alience](https://github.com/AlexTunder/ossa/blob/gh-pages/readme-heading-01.png)
 
 **Открытый набор библиотек и утилит** для работы с чатами и создания собственного чата, а также отдельный вариант чата с открытым исходным кодом как для сервера, так и для клиентов
 
