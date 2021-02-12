@@ -1,6 +1,17 @@
 #pragma once
 #include "../src/types.h"
 
+// Free auth based on MAC-address
+#define OSSA_AUTH_FREE_MAC 0x2e
+// Free auth based on IPv4 address
+#define OSSA_AUTH_FREE_IP4 0x64
+// Protected auth with login/password
+#define OSSA_AUTH_PWD_UN 0x7b
+// Protected auth with passwords
+#define OSSA_AUTH_PWD_MAC 0x6c
+// Unknowen auth method
+#define OSSA_AUTH_PWD_UAM 0x5d
+
 #define OSSA_SERVER_CONNECTON   -1
 #define OSSA_FAILED_GET_HARDWR  -2
 #define OSSA_NET_INVALID_PROTO   -3
