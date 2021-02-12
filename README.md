@@ -67,5 +67,5 @@ git clone https://github.com/AlexTunder/ossa.git
 
 * **Andrezoo** — *Документация и front-end* — [Github Profile](https://github.com/andrezoo)
 
-* **Bjorrain** — *Сетевая часть*
+* **Bjorrain** — *Сетевая часть, безопастность и протоколы*
 ----
