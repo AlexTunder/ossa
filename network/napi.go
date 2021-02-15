@@ -90,12 +90,13 @@ func authServer(username *C.char, password *C.char) C.int {
 	// fmt.Printf("Using %v user with %x hash of password\n", C.GoString(username), hashPWD)s
 	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000f001c\nUsername: %v\nPwd-hash: %x\r", C.GoString(username), hashPWD)
 	message, _ := bufio.NewReader(mainStream.serverFD).ReadString('\n')
-	lines := strings.Split(message, "\n")
+	lines := strings.Split(message, "\r")
 	words := strings.Split(lines[0], " ")
 	if words[0] != "OSSA-PTC:" {
 		// OSSA_INVALID_PROTO
 		return -3
 	}
+	// fmt.Printf("getted lines: %v\n",lines)
 	if words[1] == "000f0a1c" {
 		words = strings.Split(lines[1], " ")
 		userid, _ := strconv.Atoi(words[1])

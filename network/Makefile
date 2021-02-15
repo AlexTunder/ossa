@@ -1,3 +1,4 @@
+default: napi api-test
 CC = gcc
 ifeq ($(OS),Windows_NT)
 	# If it's Windows
@@ -24,4 +25,3 @@ napi-cp:
 api-test:
 	@echo [CC] building test...
 	@$(CC) api-test.c -o test ../lib/net-ossa.a $(CC_FLAG)
-default: napi api-test

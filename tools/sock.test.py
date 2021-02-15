@@ -35,13 +35,14 @@ while True:
                 if (users[i] == words[3]):
                     appendD = 0
                     if hashs[i] == words[5]:
-                        snd = b"OSSA-PTC: 000f0a1c\nUserid: "+ str(i).encode() +b'\n'
+                        snd = b"OSSA-PTC: 000f0a1c\rUserid: "+ str(i).encode() +b'\n'
                         print("send:", snd)
                         conn.send(snd)
                         #now, bind addr_active with addr_unames
-                        for j in range(0, len(addr_active)):
+                        for j in range(0, len(addr_unames)):
                             if(addr_active[j] == addr):
                                 addr_unames[j] = users[j]
+                                # print (j)
                                 break
                         break
             if (appendD == 1):
