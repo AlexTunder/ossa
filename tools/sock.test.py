@@ -49,9 +49,9 @@ while True:
         elif words[1] == b'5c0f001c':
             #reg new user
             reg = 0
-            for i in range(0, len(addr_active)):
+            for i in range(0, len(addr_active)-1):
                 if addr_active[i] == addr:
-                    for j in range(0, users):
+                    for j in range(0, len(users)-1):
                         if(users[j] == addr_unames[i]):
                             if(access[j] == b'ALL'):
                                 #append user to userlist

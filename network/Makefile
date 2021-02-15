@@ -1,11 +1,27 @@
+CC = gcc
+ifeq ($(OS),Windows_NT)
+	# If it's Windows
+	gocompl = C:\Program Files\Go\bin\go
+	mv = move
+	rm = del
+	cp = copy
+	# CC_FLAG += -lpthread
+else
+	gocompl = 'go'
+	CC_FLAG += -lpthread
+endif
 napi:
-	go build -buildmode=c-archive napi.go
-	mv napi.a ../lib/net-ossa.a
-	rm napi.h
+	@echo [GO] Building static lib
+	@$(gocompl) build -buildmode=c-archive ./napi.go
+	@echo [FS] Moving static lib to ossa/lib
+	@$(mv) napi.a ../lib/net-ossa.a
+	@echo [FS] cleaning up
+	@$(rm) napi.h
 napi-cp:
-	go build -buildmode=c-archive napi.go
-	cp  napi.a ../lib/net-ossa.a
-	rm napi.h
+	@$(gocompl) build -buildmode=c-archive napi.go
+	@$(cp)  napi.a ../lib/net-ossa.a
+	@$(rm) napi.h
 api-test:
-	gcc api-test.c -o test ../lib/net-ossa.a -lpthread
-default: napi
+	@echo [CC] building test...
+	@$(CC) api-test.c -o test ../lib/net-ossa.a $(CC_FLAG)
+default: napi api-test

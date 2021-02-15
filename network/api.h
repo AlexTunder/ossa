@@ -1,5 +1,5 @@
 #pragma once
-#include "../src/types.h"
+#include "../core/types.h"
 
 // Free auth based on MAC-address
 #define OSSA_AUTH_FREE_MAC 0x2e

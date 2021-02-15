@@ -1,6 +1,6 @@
 package main
 
-//#include "../src/types.h"
+//#include "../core/types.h"
 import "C"
 import (
 	"bufio"
