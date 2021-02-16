@@ -10,6 +10,9 @@ ifeq ($(OS),Windows_NT)
 else
 	gocompl = 'go'
 	CC_FLAG += -lpthread
+	mv = mv
+	rm = rm
+	cp = cp
 endif
 napi:
 	@echo [GO] Building static lib
