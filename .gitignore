@@ -1,7 +1,6 @@
 *.exe
-<<<<<<< HEAD
 *.out
-src/tests/test
+core/tests/test
 example.chat
 roles.list
 users.list
@@ -12,7 +11,4 @@ bin/*
 .cache
 *.chat
 *.list
-=======
-*.lang
-.vscode
->>>>>>> slave
+*test*
