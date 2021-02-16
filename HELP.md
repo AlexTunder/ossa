@@ -135,7 +135,7 @@ Buld ONLY OSMIC
 Build with optimization
 ### -debug
 Beuld with debug info
-##Conf
+## Conf
 This is default OSMIC settings. You can change it and view. Every commands have next syntax:
 ```
 # Set config field value
