@@ -387,7 +387,8 @@ int main(int argc, char **argv){
             printf("[*]Killing updater proccess...\n");
             system(toKill);
         }else if(!strcmp(argv[i], "--lang")){
-            sprintf(langPath, "./languages/%s.lang", argv[++i]);
+            free(langPath);
+            langPath = argv[++i];
         }
     }
     loadLMFromFile(langPath, &strStorage);
