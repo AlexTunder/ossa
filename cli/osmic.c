@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
+#include <locale.h>
 #include "../core/chat.h"
 #include "../core/envl.c"
 
@@ -371,6 +372,10 @@ int handleCLI(struct Chat *chat, int *me){
 } 
 
 int main(int argc, char **argv){
+    /* Languages */
+    #ifdef __WIN32
+     system("chcp 65001"); //Setting up UTF-8!
+    #endif
     /* default settings */
     char *langPath = (char*)malloc(10240);
     sprintf(langPath, "default.lang");
@@ -386,6 +391,8 @@ int main(int argc, char **argv){
         }
     }
     loadLMFromFile(langPath, &strStorage);
+    printf("locale: \'%s\'\n", strStorage.details.locale);
+    setlocale(LC_ALL, strStorage.details.locale);
     printf("%s\n", strStorage.output.welcome); //Welcome!
     /* main code */
    int me = 0;
@@ -410,7 +417,7 @@ int main(int argc, char **argv){
     }else if(code == CLI_ERRF){
         printf("Fail: command error. Check all commands\n");
     }else if(code == CLI_CNF){
-        printf("Command not found\n");
+        
     }
    }
    return 0;

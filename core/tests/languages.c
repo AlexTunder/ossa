@@ -4,7 +4,7 @@
 #include <wchar.h>
 #include "../types.h"
 #include "../base.c"
-#include "../languages.c"
+#include "../envl.c"
 
 struct DynamicLanguageMap dlm = {0x0, 0x0};
 
@@ -16,7 +16,7 @@ void callback_fail(const char *target, int code){
 }
 
 int main(){
-    char *lcl = setlocale(LC_ALL, "");
+    char *lcl = setlocale(LC_ALL, ".utf8");
     // printf("Привет, cześć! Локаль: %s\n", lcl);
     // fwide(stdout, 1);
     int loaded  = loadDLMFromFile("../../languages/pl.lang", &dlm);
