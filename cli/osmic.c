@@ -1,5 +1,6 @@
 #define AIRLIB_PATH "/"
 #define ENABLE_ACCESS   
+#define SETTINGS
 // #include "..\airlib\OpenCppNet\Socket.hpp"
 #include <stdio.h>
 #include <stdlib.h>
