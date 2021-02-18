@@ -1,0 +1,11 @@
+000f0010 - hardware info (connect stage)
+000faa1c - open MAC-addr auth enable
+000faf1c - open IP-addr auth enable
+000f0010 - username and password auth enable
+000f0a10 - MAC and password auth enable
+000f001c - auth try
+000f0a1c - auth success
+5c0f001c - push user
+4c0f001c - send message
+faafff1c - unauthed
+000f0b1c - new user pushed successful

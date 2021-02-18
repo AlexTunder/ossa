@@ -40,8 +40,12 @@ while True:
                         conn.send(snd)
                         #now, bind addr_active with addr_unames
                         for j in range(0, len(addr_unames)):
+                            print (addr_unames, users)
                             if(addr_active[j] == addr):
-                                addr_unames[j] = users[j]
+                                if (len(addr_unames) < len(users)):
+                                    users.append("$none")
+                                    print(addr_unames[j])
+                                    addr_unames[j] = users[j]
                                 # print (j)
                                 break
                         break

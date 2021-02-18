@@ -9,6 +9,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	// "unsafe"
 )
 
 func getMacAddr() ([]string, error) {
@@ -120,7 +121,7 @@ func closeServer(serverID C.int) C.int {
 
 //export useraddServer
 func useraddServer(name *C.char, pwd *C.char) C.int {
-	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 5c0f001c\nUsername: %v\nPwd-clear:%v\r", C.GoString(name), C.GoString(pwd))
+	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 5c0f001c\nUsername: %v\nPwd-clear: %v\r", C.GoString(name), C.GoString(pwd))
 	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
 	fmt.Println(message)
 	if err != nil {
@@ -152,7 +153,8 @@ func useraddServer(name *C.char, pwd *C.char) C.int {
 /* Messages */
 //export sendMessage
 func sendMessage(mes C.struct_Message) C.int {
-
+	// fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 4c0f001c\rlen: %v\nContent:%v\r", unsafe.Sizeof(mes), C.GoString(pwd))
+	// message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
 	return 0
 }
 
