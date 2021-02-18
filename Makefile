@@ -13,13 +13,16 @@ else
 endif
 
 CBase:
-	@echo [MF] [core] core/base.c
+	@echo [MF] core/base.c
 	@gcc -c core/base.c -o lib/libossa.a
 net:
-	@echo [MF] [network] network
+	@echo [MF] network
 	@make -C ./network -s
 osmic:
 	@echo [CC] cli/osmic.c
 	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG)
 full: network osmic
 lib: CBase net
+test.net:
+	@make lib -s
+	@make -C network api-test -s

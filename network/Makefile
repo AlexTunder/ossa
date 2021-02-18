@@ -18,13 +18,13 @@ napi:
 	@echo [GO] Building static lib
 	@$(gocompl) build -buildmode=c-archive ./napi.go
 	@echo [FS] Moving static lib to ossa/lib
-	@$(mv) napi.a ../lib/libossac.lib
+	@$(mv) napi.a ../lib/libossac.a
 	@echo [FS] cleaning up
 	@$(rm) napi.h
 napi-cp:
 	@$(gocompl) build -buildmode=c-archive napi.go
-	@$(cp)  napi.a ../lib/libossac.lib
+	@$(cp)  napi.a ../lib/libossac.a
 	@$(rm) napi.h
 api-test:
 	@echo [CC] building test...
-	@$(CC) api-test.c -o test ../lib/libossac.lib $(CC_FLAG)
+	@$(CC) api-test.c -o test ../lib/libossac.a $(CC_FLAG)

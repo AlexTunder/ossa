@@ -1,4 +1,4 @@
-#pragma once
+// #pragma once
 #ifndef CCHAT_BASE_H
  #include "base.h"
 #endif
