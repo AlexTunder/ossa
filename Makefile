@@ -1,4 +1,4 @@
-default: full
+default: lib osmic
 CC = gcc
 ifeq ($(OS),Windows_NT)
 	# If it's Windows
@@ -12,10 +12,14 @@ else
 	CC_FLAG += -lpthread
 endif
 
-network:
-	@echo [MF] network
-	@make -C $network -s
+CBase:
+	@echo [MF] [core] core/base.c
+	@gcc -c core/base.c -o lib/libossa.a
+net:
+	@echo [MF] [network] network
+	@make -C ./network -s
 osmic:
 	@echo [CC] cli/osmic.c
 	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG)
 full: network osmic
+lib: CBase net

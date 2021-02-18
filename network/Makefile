@@ -1,4 +1,4 @@
-default: napi api-test
+default: napi
 CC = gcc
 ifeq ($(OS),Windows_NT)
 	# If it's Windows
@@ -18,7 +18,7 @@ napi:
 	@echo [GO] Building static lib
 	@$(gocompl) build -buildmode=c-archive ./napi.go
 	@echo [FS] Moving static lib to ossa/lib
-	@$(mv) napi.a ../lib/net-ossa.a
+	@$(mv) napi.a ../lib/net-ossa.lib
 	@echo [FS] cleaning up
 	@$(rm) napi.h
 napi-cp:
