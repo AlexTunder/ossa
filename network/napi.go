@@ -1,6 +1,7 @@
 package main
 
 //#include "../core/types.h"
+//#include "../core/base.h"
 import "C"
 import (
 	"bufio"
@@ -155,11 +156,12 @@ func useraddServer(name *C.char, pwd *C.char) C.int {
 func sendMessage(mes C.struct_Message) C.int {
 	// fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 4c0f001c\rlen: %v\nContent:%v\r", unsafe.Sizeof(mes), C.GoString(pwd))
 	// message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
+	// C.pushMessageToML(mes, ml)
 	return 0
 }
 
 //export syncMessages
-func syncMessages(ml C.struct_MessageList) C.int {
+func syncMessages(ml *C.struct_MessageList) C.int {
 
 	return 0
 }
