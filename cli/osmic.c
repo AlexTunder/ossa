@@ -8,7 +8,11 @@
 #include <time.h>
 #include <sys/types.h>
 #include <locale.h>
-#include <unistd.h>
+#ifndef __WIN32
+ #include <unistd.h>
+#else
+ #include<conio.h>
+#endif
 
 #include "../core/chat.h"
 #include "../core/envl.c"
@@ -351,10 +355,19 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 if(c == '\n') break;
                 else uname[i] = c;
             }
-            printf("Passwords: ");
+            printf("Password: ");
             c = 0;
             // char *pwd = (char*)malloc(1024);
+            #ifndef __WIN32
             char *pwd = getpass("");
+            #else
+            char *pwd = (char*)malloc(1024);
+            for (int i = 0; i < 1024; i++){
+                c = getch();
+                if(c == 13) break;
+                else pwd[i] = c;
+            }
+            #endif
             server_access = authServer(uname, pwd);
             if(server_access < 0){
                 printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong username or password\n");
@@ -466,6 +479,8 @@ int main(int argc, char **argv){
     if(code < CLI_ERRF) last ++;
     else if(code == CLI_EXIT){
         printf("%s\n", strStorage.output.exit);
+        // destroyUL(&chat.userList);
+        closeServer(0);
         break;
     }else if(code == CLI_ERRF){
         printf("Fail: command error. Check all commands\n");

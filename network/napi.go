@@ -249,7 +249,7 @@ func syncMessages(ml *C.struct_MessageList) C.int {
 						gettedMes.content = C.CString(jsonField[1])
 					} else if jsonField[0] == "date" {
 						itn, _ = strconv.Atoi(jsonField[1])
-						gettedMes.date = C.long(itn)
+						gettedMes.date = C.longlong(itn)
 					} else if jsonField[0] == "sender" {
 						itn, _ := strconv.Atoi(jsonField[1])
 						// fmt.Printf("%v", reee)
