@@ -1,15 +1,28 @@
-default: updater update
-debug: updater update-debug
-o3: updater update-o3
-updater:
-	gcc src/recompiler.c -o dist.exe -O3 -Wall
-update:
-	gcc src/main.c -o osmic.exe -Wall
-update-o3:
-	gcc src/main.c -o osmic.exe -O3 -Wall
-update-debug:
-	gcc src/main.c -o osmic.exe -g3 -Wall
-update-o3-debug:
-	gcc src/main.c -o osmic.exe -O3 -g3 -Wall
-clean-res:
-	rm 16*	
+default: lib osmic
+CC = gcc
+ifeq ($(OS),Windows_NT)
+	# If it's Windows
+	gocompl = C:\Program Files\Go\bin\go
+	mv = move
+	rm = del
+	cp = copy
+	# CC_FLAG += -lpthread
+else
+	gocompl = 'go'
+	CC_FLAG += -lpthread
+endif
+
+CBase:
+	@echo [MF] core/base.c
+	@gcc -c core/base.c -o lib/libossa.a
+net:
+	@echo [MF] network
+	@make -C ./network -s
+osmic:
+	@echo [CC] cli/osmic.c
+	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG)
+full: network osmic
+lib: CBase net
+test.net:
+	@make lib -s
+	@make -C network api-test -s
