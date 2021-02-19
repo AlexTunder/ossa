@@ -6,8 +6,10 @@
 
 int returnCode = 0;
 
+struct MessageList ml;
+
 int main(){
-    
+
     returnCode = setServer("127.0.0.1", 8000);
     printf("Connecting...\n");
     
@@ -39,5 +41,17 @@ int main(){
     if(returnCode < 0) printf("Failed to send message: %i\n", returnCode);
     else printf("Count of messages: %i\n", returnCode);
     
+    printf("Syncing messages...\n");
+    returnCode = syncMessages(&ml);
+    if(returnCode < 0){
+        printf("failed to sync messages: %i\n", returnCode);
+        closeServer(0);
+        return -1;
+    }
+    printf("New messages: %i\n", returnCode);
+    for(int i = 0; i < returnCode; i++){
+        printf("Message: #%i\n\tUserID:%i\n\tTime:%i\n\t%s\n", i, getMessageML(&ml, i).userid,getMessageML(&ml, i).date,getMessageML(&ml, i).content);
+    }
+
     closeServer(0);
 }

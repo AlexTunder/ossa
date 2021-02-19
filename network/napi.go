@@ -195,8 +195,59 @@ func sendMessage(mes C.struct_Message) C.int {
 
 //export syncMessages
 func syncMessages(ml *C.struct_MessageList) C.int {
+	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000bf11a\nFrom: %v\n", C.getLastFromML(ml).date)
+	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
 
-	return 0
+	if err != nil {
+		return -1
+	}
+
+	var newMes int
+
+	lines := strings.Split(message, "\r")
+	words := strings.Split(lines[0], " ")
+
+	if words[1] == "000bf110" {
+		return 0
+	} else if words[1] == "000bf11f" {
+		for i := 1; i < len(lines); i++ {
+			words = strings.Split(lines[i], " ")
+			if words[0] == "Count:" {
+				newMes, _ = strconv.Atoi(words[1])
+			}
+			if words[0] == "Content:next" {
+				//All JSON contained on the next line
+				//Content: {"body":"hello","date":"1774212414","sender":"1"}
+				i++
+
+				var itn int = 0
+
+				rw001 := strings.Trim(lines[i], "{")
+				rw001 = strings.Trim(rw001, "}")
+
+				json_parsed := strings.Split(rw001, ",")
+				var gettedMes C.struct_Message = C.makeMes(C.CString(""), 0)
+				for j := 0; i < len(json_parsed); i++ {
+					json_field := strings.Split(json_parsed[j], ":")
+					json_field[0] = strings.Trim(json_field[0], "\"")
+					json_field[1] = strings.Trim(json_field[1], "\"")
+					if json_field[0] == "body" {
+						gettedMes.content = C.CString(json_field[1])
+					} else if json_field[0] == "date" {
+						itn, _ = strconv.Atoi(json_field[1])
+						gettedMes.date = C.long(itn)
+					} else if json_field[0] == "sender" {
+						itn, _ = strconv.Atoi(json_field[1])
+						gettedMes.userid = C.int(C.long(itn))
+					}
+				}
+				C.pushMessageToML(gettedMes, ml)
+			}
+		}
+		// count := strconv.Atpi(words[])
+		return C.int(newMes)
+	}
+	return -3
 }
 
 //export delMessage
