@@ -39,14 +39,9 @@ while True:
                         print("send:", snd)
                         conn.send(snd)
                         #now, bind addr_active with addr_unames
-                        for j in range(0, len(addr_unames)):
-                            print (addr_unames, users)
+                        for j in range(0, len(addr_active)):
                             if(addr_active[j] == addr):
-                                if (len(addr_unames) < len(users)):
-                                    users.append("$none")
-                                    print(addr_unames[j])
-                                    addr_unames[j] = users[j]
-                                # print (j)
+                                addr_unames[j] = users[i]
                                 break
                         break
             if (appendD == 1):
@@ -70,6 +65,16 @@ while True:
                     break
             if(reg == 0):
                 conn.send(b'OSSA-PTC: faafff1c\nERROR: 5\r')
-                
+        elif words[1] == b'4c0f001c':
+            for i in range(0, len(addr_active)):
+                if(addr_active[i] == addr):
+                        if(addr_unames[i] != '$none'):
+                            conn.send(b'OSSA-PTC: 0000f11a\rTotal: 15\n')
+                            print("MO")
+                        else:
+                            conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
+                            print("MF")
+        else:
+            print("UnSy")
     conn.close()
     print(addr, 'disconnected')

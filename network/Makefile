@@ -27,4 +27,4 @@ napi-cp:
 	@$(rm) napi.h
 api-test:
 	@echo [CC] building test...
-	@$(CC) api-test.c -o test ../lib/libossac.a $(CC_FLAG)
+	@$(CC) api-test.c -o test ../lib/libossac.a ../lib/libossa.a $(CC_FLAG)

@@ -9,3 +9,5 @@
 4c0f001c - send message
 faafff1c - unauthed
 000f0b1c - new user pushed successful
+0000f11a - message sended successful
+0000f10a - failed to send message

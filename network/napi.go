@@ -129,7 +129,7 @@ func useraddServer(name *C.char, pwd *C.char) C.int {
 	if err != nil {
 		return -1
 	}
-	lines := strings.Split(message, "\n")
+	lines := strings.Split(message, "\r")
 	words := strings.Split(lines[0], " ")
 	if words[0] != "OSSA-PTC:" {
 		return -3
@@ -141,7 +141,7 @@ func useraddServer(name *C.char, pwd *C.char) C.int {
 		words = strings.Split(lines[i], " ")
 		if words[0] == "UID: " {
 			uid, _ = strconv.Atoi(words[1])
-		} else if words[0] == "ERROR: " {
+		} else if words[0] == "ERROR:" {
 			gerr, _ = strconv.Atoi(words[1])
 		}
 	}
@@ -155,9 +155,42 @@ func useraddServer(name *C.char, pwd *C.char) C.int {
 /* Messages */
 //export sendMessage
 func sendMessage(mes C.struct_Message) C.int {
-	// fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 4c0f001c\rlen: %v\nContent:%v\r", unsafe.Sizeof(mes), C.GoString(pwd))
-	// message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
-	return 0
+	jsonSend := "a"
+	jsonSend = fmt.Sprintf("{\"body\":\"%v\",\"date\":\"%v\",\"sender\":\"%v\"}", mes.content, mes.date, mes.userid)
+	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 4c0f001c\nlen:%v\n%v\n", len(jsonSend), jsonSend)
+	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
+	if err != nil {
+		return -1
+	}
+	lines := strings.Split(message, "\r")
+	words := strings.Split(lines[0], " ")
+	if words[0] != "OSSA-PTC:" {
+		return -3
+	}
+	fmt.Printf("'%v'\n'%v'\n'%v'\n", words, lines, words[1])
+	if words[1] == "0000f10a" {
+		for i := 1; i < len(lines)-1; i++ {
+			words = strings.Split(lines[i], " ")
+			if words[0] == "ERROR:" {
+				ret, _ := strconv.Atoi(words[1])
+				fmt.Printf("error: %v\n", ret)
+				return -1 * C.int(ret)
+			}
+		}
+		return -1000
+	} else if words[1] == "0000f11a" {
+		for i := 1; i < len(lines)-1; i++ {
+			words = strings.Split(lines[i], " ")
+			if words[0] == "Total: " {
+				ret, _ := strconv.Atoi(words[1])
+				fmt.Printf("total: %v\n", ret)
+				return C.int(ret)
+			}
+		}
+		return 0
+	} else {
+		return -3
+	}
 }
 
 //export syncMessages
