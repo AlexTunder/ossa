@@ -44,6 +44,8 @@ while True:
                                 addr_unames[j] = users[i]
                                 break
                         break
+                    else:
+                        conn.send(b'OSSA-PTC: 000f0a0c\n')
             if (appendD == 1):
                 conn.send(b"OSSA-PTC: f00f0f1c\n")
         elif words[1] == b'5c0f001c':
@@ -79,6 +81,15 @@ while True:
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
                             conn.send(b'OSSA-PTC: 000bf11f\rCount: 1\rContent:next\r{\"body\":\"Hi!\",\"date\":\"16666213\",\"sender\":\"1\"}\n')
+                            print("MU")
+                        else:
+                            conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
+                            print("MF")
+        elif words[1] == b'000ba110':
+            for i in range(0, len(addr_active)):
+                if(addr_active[i] == addr):
+                        if(addr_unames[i] != '$none'):
+                            conn.send(b'OSSA-PTC: 002ba110\rCount: 3\rContent:next\r{\"username\":\"system\"}\rContent:next\r{\"username\":\"16666213\"}\rContent:next\r{\"username\":\"1\"}\n')
                             print("MU")
                         else:
                             conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')

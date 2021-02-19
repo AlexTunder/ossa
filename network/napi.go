@@ -57,6 +57,7 @@ func setServer(host *C.char, port C.int) C.int {
 	}
 
 	if mainStream.serverER != nil {
+		fmt.Printf("(*) libossac.a: failed to connect: %v\n", mainStream.serverER)
 		return -1
 	}
 
@@ -104,6 +105,8 @@ func authServer(username *C.char, password *C.char) C.int {
 		words = strings.Split(lines[1], " ")
 		userid, _ := strconv.Atoi(words[1])
 		return C.int(userid)
+	} else if words[1] == "000f0a0c" {
+		return -4
 	}
 	//Auth failed
 	return -4
@@ -272,14 +275,61 @@ func delMessage(mes C.struct_Message) C.int {
 /* Rolers */
 //export syncRoles
 func syncRoles(roler C.struct_Roler) C.int {
-
 	return 0
 }
 
 //export syncUsers
-func syncUsers(userList C.struct_UserList) C.int {
+func syncUsers(userList *C.struct_UserList) C.int {
 
-	return 0
+	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000ba110\n")
+	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
+	message = strings.Trim(message, "\n")
+
+	if err != nil {
+		return -1
+	}
+
+	var newMes int
+
+	lines := strings.Split(message, "\r")
+	words := strings.Split(lines[0], " ")
+
+	if words[1] == "002ba110" {
+		for i := 1; i < len(lines); i++ {
+			words = strings.Split(lines[i], " ")
+			if words[0] == "Count:" {
+				newMes, _ = strconv.Atoi(words[1])
+			}
+			if words[0] == "Content:next" {
+				i++
+				rw001 := strings.Trim(lines[i], "{")
+				rw001 = strings.Trim(rw001, "}")
+
+				jsonParsed := strings.Split(rw001, ",")
+				fmt.Printf("Parsed data: %v, len: %v\n", jsonParsed, len(jsonParsed))
+				var uname string
+				for j := 0; j < len(jsonParsed); j++ {
+					jsonField := strings.Split(jsonParsed[j], ":")
+					jsonField[0] = strings.Trim(jsonField[0], "\"")
+					jsonField[1] = strings.Trim(jsonField[1], "\"")
+
+					if jsonField[0] == "username" {
+						uname = jsonField[1]
+					} else if jsonField[0] == "MAC" {
+						if len(uname) >= len(jsonField[1]) {
+							uname = jsonField[1] + "\r" + uname
+						} else {
+							uname = jsonField[1] + "\t\t" + uname
+						}
+					}
+				}
+				C.pushUserToUL(C.CString(uname), userList)
+			}
+		}
+		// count := strconv.Atpi(words[])
+		return C.int(newMes)
+	}
+	return -3
 }
 
 //export pullRoles

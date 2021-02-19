@@ -20,8 +20,8 @@ net:
 	@make -C ./network -s
 osmic:
 	@echo [CC] cli/osmic.c
-	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG)
-full: network osmic
+	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG) ./lib/libossac.a
+full: lib osmic
 lib: CBase net
 test.net:
 	@make lib -s

@@ -245,6 +245,14 @@ int checkInRole(struct Role *role, int user);
  */ extern
 int getUserAccess(int userid, struct UserList *userList);
 
+/**
+ * @brief Destroy all struct of userlist
+ * 
+ * @param ul - UserList target
+ * @return int - count of deleted data  
+ */
+int destroyUL(struct UserList *ul);
+
  #ifdef CCHAT_USE_SRC
   #include "./base.c"
  #else

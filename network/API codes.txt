@@ -6,6 +6,7 @@
 
 000f001c - auth try
 000f0a1c - auth success
+000f0a0c - auth failed
 5c0f001c - push user
 faafff1c - unauthed
 000f0b1c - new user pushed successful
@@ -17,3 +18,6 @@ faafff1c - unauthed
 000bf11f - new messages on server
 000bf110 - no new messages on server
 100bf11a - message incoming
+
+000ba110 - user list request
+002ba110 - send user list

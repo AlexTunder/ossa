@@ -8,9 +8,10 @@
 #include <time.h>
 #include <sys/types.h>
 #include <locale.h>
+#include <unistd.h>
+
 #include "../core/chat.h"
 #include "../core/envl.c"
-
 #include "../network/api.h"
 
 struct LangMap strStorage;
@@ -313,6 +314,56 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 getMLFromML(&chat->messages, atoi(comm[2]))->next = ml->next;
                 free(ml);
             }
+        }
+    } else if(!strcmp(comm[0], "conn")){
+        //conn[1] - IP conn[2] - port
+        if(!strcmp(comm[1], "") || !strcmp(comm[2], "")){
+            // No ip or port
+            return -1;
+        }
+        int server_access = setServer(comm[1], atoi(comm[2]));
+        if (server_access == OSSA_AUTH_FREE_MAC){
+            printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET" (MAC-open chat)\nUser ID: %i\n", authServer("",""));
+        }else if(server_access == OSSA_AUTH_FREE_IP4){
+            printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET" (IPv4-open chat)\nUser ID: %i\n", authServer("",""));
+        }else if(server_access == OSSA_AUTH_PWD_MAC){
+            printf(ANSI_COLOR_GREEN"Accepted"ANSI_COLOR_RESET" (MAC-Chat with password)\nPassword: ");
+            char c = 0;
+            char *pwd = (char*)malloc(1024);
+            for (int i = 0; i < 1024; i++){
+                c = getchar();
+                if(c == '\n') break;
+                else pwd[i] = c;
+            }
+            server_access = authServer("", pwd);
+            if(server_access < 0){
+                printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong password\n");
+                return -1;
+            }else{
+                printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
+            }
+        }else if(server_access == OSSA_AUTH_PWD_UN){
+            printf(ANSI_COLOR_GREEN"Accepted"ANSI_COLOR_RESET" (Usernames-Chat with password)\nUsername: ");
+            char c = 0;
+            char *uname = (char*)malloc(1024);
+            for (int i = 0; i < 1024; i++){
+                c = getchar();
+                if(c == '\n') break;
+                else uname[i] = c;
+            }
+            printf("Passwords: ");
+            c = 0;
+            // char *pwd = (char*)malloc(1024);
+            char *pwd = getpass("");
+            server_access = authServer(uname, pwd);
+            if(server_access < 0){
+                printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong username or password\n");
+                return -1;
+            }else{
+                printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
+            }
+        }else{
+            printf(ANSI_COLOR_RED"Failed to connect"ANSI_COLOR_RESET": irregular answer, error code: %i\n", server_access);
         }
     }
     else {

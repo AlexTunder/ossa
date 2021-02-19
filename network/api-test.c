@@ -7,6 +7,7 @@
 int returnCode = 0;
 
 struct MessageList ml;
+struct UserList ul;
 
 int main(){
 
@@ -51,6 +52,19 @@ int main(){
     printf("New messages: %i\n", returnCode);
     for(int i = 0; i < getMessagesCountML(&ml); i++){
         printf("Message: #%i\n\tUserID:%i\n\tTime:%i\n\t%s\n", i, getMessageML(&ml, i).userid,getMessageML(&ml, i).date,getMessageML(&ml, i).content);
+    }
+
+    printf("syncing userlist...\n");
+    returnCode = syncUsers(&ul);
+    if(returnCode < 3){
+        printf("failed to sync users: %i\n", returnCode);
+        closeServer(0);
+        return -1;
+    }
+    
+    printf("Users count: %i\n", returnCode);
+    for(int i = 0; i < returnCode+1; i++){
+        printf("User: #%i\n\tName: %s\n", i , getUsernameByID(i, &ul));
     }
 
     closeServer(0);
