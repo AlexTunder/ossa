@@ -74,6 +74,15 @@ while True:
                         else:
                             conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
                             print("MF")
+        elif words[1] == b'000bf11a':
+            for i in range(0, len(addr_active)):
+                if(addr_active[i] == addr):
+                        if(addr_unames[i] != '$none'):
+                            conn.send(b'OSSA-PTC: 000bf11f\rCount: 1\rContent:next\r{\"body\":\"Hello!\",\"date\":\"16666213\",\"sender\":\"0\"}\n')
+                            print("MU")
+                        else:
+                            conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
+                            print("MF")
         else:
             print("UnSy")
     conn.close()
