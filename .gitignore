@@ -11,4 +11,4 @@ bin/*
 .cache
 *.chat
 *.list
-*test*
+test*
