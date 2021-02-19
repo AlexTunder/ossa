@@ -1,0 +1,14 @@
+*.exe
+*.out
+core/tests/test
+example.chat
+roles.list
+users.list
+*.log
+*.kdb
+.vscode
+bin/*
+.cache
+*.chat
+*.list
+*test*
