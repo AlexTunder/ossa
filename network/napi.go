@@ -125,7 +125,7 @@ func closeServer(serverID C.int) C.int {
 func useraddServer(name *C.char, pwd *C.char) C.int {
 	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 5c0f001c\nUsername: %v\nPwd-clear: %v\r", C.GoString(name), C.GoString(pwd))
 	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
-	fmt.Println(message)
+	// fmt.Println(message)
 	if err != nil {
 		return -1
 	}
@@ -156,7 +156,7 @@ func useraddServer(name *C.char, pwd *C.char) C.int {
 //export sendMessage
 func sendMessage(mes C.struct_Message) C.int {
 	jsonSend := "a"
-	jsonSend = fmt.Sprintf("{\"body\":\"%v\",\"date\":\"%v\",\"sender\":\"%v\"}", mes.content, mes.date, mes.userid)
+	jsonSend = fmt.Sprintf("{\"body\":\"%v\",\"date\":\"%v\",\"sender\":\"%v\"}", C.GoString(mes.content), mes.date, mes.userid)
 	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 4c0f001c\nlen:%v\n%v\n", len(jsonSend), jsonSend)
 	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
 	if err != nil {
@@ -167,13 +167,13 @@ func sendMessage(mes C.struct_Message) C.int {
 	if words[0] != "OSSA-PTC:" {
 		return -3
 	}
-	fmt.Printf("'%v'\n'%v'\n'%v'\n", words, lines, words[1])
+	// fmt.Printf("'%v'\n'%v'\n'%v'\n", words, lines, words[1])
 	if words[1] == "0000f10a" {
 		for i := 1; i < len(lines)-1; i++ {
 			words = strings.Split(lines[i], " ")
 			if words[0] == "ERROR:" {
 				ret, _ := strconv.Atoi(words[1])
-				fmt.Printf("error: %v\n", ret)
+				// fmt.Printf("error: %v\n", ret)
 				return -1 * C.int(ret)
 			}
 		}
@@ -183,7 +183,7 @@ func sendMessage(mes C.struct_Message) C.int {
 			words = strings.Split(lines[i], " ")
 			if words[0] == "Total: " {
 				ret, _ := strconv.Atoi(words[1])
-				fmt.Printf("total: %v\n", ret)
+				// fmt.Printf("total: %v\n", ret)
 				return C.int(ret)
 			}
 		}
@@ -197,6 +197,7 @@ func sendMessage(mes C.struct_Message) C.int {
 func syncMessages(ml *C.struct_MessageList) C.int {
 	fmt.Fprintf(mainStream.serverFD, "OSSA-PTC: 000bf11a\nFrom: %v\n", C.getLastFromML(ml).date)
 	message, err := bufio.NewReader(mainStream.serverFD).ReadString('\n')
+	message = strings.Trim(message, "\n")
 
 	if err != nil {
 		return -1
@@ -216,29 +217,41 @@ func syncMessages(ml *C.struct_MessageList) C.int {
 				newMes, _ = strconv.Atoi(words[1])
 			}
 			if words[0] == "Content:next" {
+
 				//All JSON contained on the next line
 				//Content: {"body":"hello","date":"1774212414","sender":"1"}
 				i++
 
 				var itn int = 0
 
+				//fmt.Printf("Conent detected! %v - is json\n", lines[i])
+
 				rw001 := strings.Trim(lines[i], "{")
 				rw001 = strings.Trim(rw001, "}")
 
-				json_parsed := strings.Split(rw001, ",")
+				jsonParsed := strings.Split(rw001, ",")
+				//fmt.Printf("Parsed data: %v, len: %v\n", jsonParsed, len(jsonParsed))
 				var gettedMes C.struct_Message = C.makeMes(C.CString(""), 0)
-				for j := 0; i < len(json_parsed); i++ {
-					json_field := strings.Split(json_parsed[j], ":")
-					json_field[0] = strings.Trim(json_field[0], "\"")
-					json_field[1] = strings.Trim(json_field[1], "\"")
-					if json_field[0] == "body" {
-						gettedMes.content = C.CString(json_field[1])
-					} else if json_field[0] == "date" {
-						itn, _ = strconv.Atoi(json_field[1])
+				for j := 0; j < len(jsonParsed)-12; j++ {
+					jsonField := strings.Split(jsonParsed[j], ":")
+					jsonField[0] = strings.Trim(jsonField[0], "\"")
+					jsonField[1] = strings.Trim(jsonField[1], "\"")
+
+					//fmt.Printf("(%v)Parsed data: %v\n", jsonParsed, jsonField)
+
+					//fmt.Printf("(warning) \"%v\" - is unknowen JSON field with \"%v\" data\n", jsonField[0], jsonField[1])
+
+					if jsonField[0] == "body" {
+						//fmt.Printf("\"%v\"\n", jsonField[1])
+						gettedMes.content = C.CString(jsonField[1])
+					} else if jsonField[0] == "date" {
+						itn, _ = strconv.Atoi(jsonField[1])
 						gettedMes.date = C.long(itn)
-					} else if json_field[0] == "sender" {
-						itn, _ = strconv.Atoi(json_field[1])
-						gettedMes.userid = C.int(C.long(itn))
+					} else if jsonField[0] == "sender" {
+						itn, _ := strconv.Atoi(jsonField[1])
+						// fmt.Printf("%v", reee)
+						// fmt.Printf("PARSING USERID (%v)(%v)!\n", jsonField[1], itn)
+						gettedMes.userid = C.int(itn)
 					}
 				}
 				C.pushMessageToML(gettedMes, ml)

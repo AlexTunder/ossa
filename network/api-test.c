@@ -49,7 +49,7 @@ int main(){
         return -1;
     }
     printf("New messages: %i\n", returnCode);
-    for(int i = 0; i < returnCode; i++){
+    for(int i = 0; i < getMessagesCountML(&ml); i++){
         printf("Message: #%i\n\tUserID:%i\n\tTime:%i\n\t%s\n", i, getMessageML(&ml, i).userid,getMessageML(&ml, i).date,getMessageML(&ml, i).content);
     }
 
