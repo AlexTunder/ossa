@@ -26,7 +26,7 @@ struct Message makeMes(const char *body, int userid){
 struct UserList initUserList(){
     char *content = (char*)malloc(strlen("system")+1);
     strcpy(content, "system");
-    #ifndef ENABLE_ACCESS
+    #ifdef DISABLE_ACCESS
      struct UserList ul = {content, NULL};
     #else
      struct UserList ul = {content, 0b11, NULL};
@@ -251,7 +251,7 @@ void addUserToRole(struct Roler *roler, int id, int roleID, struct UserList* ul)
             counter = counter->next;
             counter->id = id;
             counter->next = NULL;
-            #ifdef ENABLE_ACCESS
+            #ifndef DISABLE_ACCESS
             if(ul != NULL){
                 getUserById(ul, id)->access = role->access;
             }
@@ -267,8 +267,25 @@ int checkInRole(struct Role *role, int user){
     }
     return 0; //User haven't permission
 }
-
-#ifdef ENABLE_ACCESS
+struct ChatList *getChatChainByIndex(struct ChatList *root, int index){
+    if(index == 0)
+        return root;
+    else return getChatChainByIndex(root->next, index-1);
+}
+int getChatChainLen(struct ChatList *root){
+    if(root->next == 0x0)
+        return 1;
+    else return getChatChainLen(root->next);
+}
+int pushChatToCL(struct ChatList *root, struct Chat chat){
+    if(root->next == 0x0){
+        root->next = (struct ChatList*) malloc(sizeof(struct ChatList));
+        root->next->chat = chat;
+        root->next->next = 0x0;
+        return 1;
+    }else return pushChatToCL(root->next, chat)+1;
+}
+#ifndef DISABLE_ACCESS
 int getUserAccess(int userid, struct UserList *userList){
     if(userList == NULL)
         return 0;

@@ -244,7 +244,6 @@ int checkInRole(struct Role *role, int user);
  * @return int - 32-bit-mask of access
  */ extern
 int getUserAccess(int userid, struct UserList *userList);
-
 /**
  * @brief Destroy all struct of userlist
  * 
@@ -252,11 +251,19 @@ int getUserAccess(int userid, struct UserList *userList);
  * @return int - count of deleted data  
  */
 int destroyUL(struct UserList *ul);
+/**
+ * @brief Destroing all elements of message list
+ * 
+ * @param ml - target
+ * @return int - count of deleted data
+ */
+int destroyML(struct MessageList *ml);
+
+struct ChatList *getChatChainByIndex(struct ChatList *root, int index);
+int getChatChainLen(struct ChatList *root);
+int pushChatToCL(struct ChatList *root, struct Chat chat);
 
  #ifdef CCHAT_USE_SRC
   #include "./base.c"
- #else
-  /// Я потом вставлю сюда объявления функций
-
  #endif
 #endif

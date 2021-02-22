@@ -12,10 +12,10 @@
 // Unknowen auth method
 #define OSSA_AUTH_PWD_UAM 0x5d
 
-#define OSSA_SERVER_CONNECTON   -1
-#define OSSA_FAILED_GET_HARDWR  -2
+#define OSSA_SERVER_CONNECTON    -1
+#define OSSA_FAILED_GET_HARDWR   -2
 #define OSSA_NET_INVALID_PROTO   -3
-#define OSSA_AUTH_FAILED                 -4
+#define OSSA_AUTH_FAILED         -4
 
 /**         Connection API          **/
 extern int setServer(const char *hostname, int port); //Make new connection to server

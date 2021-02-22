@@ -7,14 +7,15 @@
 #endif
 #ifndef CCHAT_USE_SRC
  #ifndef CCHAT_FILEWORKS_H
-  struct MessageList loadMLFromStream(const char *target);
-  struct UserList loadULFromStream(const char *target);
-  struct Roler loadRolerFromStream(const char *target);
+   ifndef CCHAT_RM_STREAM
+   struct MessageList loadMLFromStream(const char *target);
+   struct UserList loadULFromStream(const char *target);
+   struct Roler loadRolerFromStream(const char *target);
+  #endif
   struct MessageList loadMLFromFile(const char *filename);
   struct UserList loadULFromFile(const char *filename);
   struct Roler loadRolerFromFile(const char *filename);
   int dropChatToFile(struct Chat *chat, char *fn_c, char *fn_u, char *fn_r);
-#endif
  #else
  #ifndef CCHAT_FILEWORKS_C
   #include "./fileworks.c"

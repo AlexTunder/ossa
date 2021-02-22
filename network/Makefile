@@ -15,16 +15,16 @@ else
 	cp = cp
 endif
 napi:
-	@echo [GO] Building static lib
-	@$(gocompl) build -buildmode=c-archive ./napi.go
-	@echo [FS] Moving static lib to ossa/lib
-	@$(mv) napi.a ../lib/libossac.a
+	@echo [GO] Building OSB
+	@$(gocompl) build -buildmode=c-archive ./osb.go
+	@echo [FS] Moving protocol static lib to ossa/lib
+	@$(mv) osb.a ../lib/libossac.a
 	@echo [FS] cleaning up
-	@$(rm) napi.h
+	@$(rm) osb.h
 napi-cp:
-	@$(gocompl) build -buildmode=c-archive napi.go
-	@$(cp)  napi.a ../lib/libossac.a
-	@$(rm) napi.h
+	@$(gocompl) build -buildmode=c-archive osb.go
+	@$(cp)  osb.a ../lib/libossac.a
+	@$(rm) osb.h
 api-test:
 	@echo [CC] building test...
 	@$(CC) api-test.c -o test ../lib/libossac.a ../lib/libossa.a $(CC_FLAG)

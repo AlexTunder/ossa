@@ -7,6 +7,7 @@
 #define CCHAT_FILEWORKS_C
 #define CCHAT_FILEWORKS_H
 
+#ifndef CCHAT_RM_STREAM
 struct MessageList loadMLFromStream(const char *str){
     struct NCStream target = makeStream(str, strlen(str));
     char *mesBuf = (char*)malloc(5120);
@@ -111,6 +112,7 @@ struct Roler loadRolerFromStream(const char *str){
     }
     return me;
 }
+#endif
 struct MessageList loadMLFromFile(const char *filename){
     struct MessageList me = initML();
     #include "fbase.h"

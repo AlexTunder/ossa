@@ -14,7 +14,7 @@
  #include<conio.h>
 #endif
 
-#include "../core/chat.h"
+#include "../core/osmic.h"
 #include "../core/envl.c"
 #include "../network/api.h"
 
@@ -47,6 +47,8 @@ struct LangMap strStorage;
 #endif
 //Global variables
 int last = 0;
+int currentChat = 0;
+struct ChatList cl = {0x0, 0x0, 0x0};
 
 int handleCommand(char comm[32][16], struct Chat *chat, int *me){
     if(!strcmp(comm[0], "exit") || !strcmp(comm[0], "q"))
@@ -97,9 +99,8 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 if(!strcmp(comm[3], "role")){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, atoi(comm[4]), &chat->userList);
-                    else{
+                    else
                         printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
-                    }
                 } else if(!strcmp(comm[3], "ban")){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, 0, &chat->userList);
@@ -132,10 +133,12 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             }else{
                 printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
             }
+        }else if(!strcmp(comm[1], "chat")){
+            currentChat = atoi(comm[2]);
         }
         else {printf("bad \'set\' parameter (%s)\n", comm[1]);return CLI_CNF;}
     } else if(!strcmp(comm[0], "view")){
-        if(!(getUserAccess(me, &chat->userList) & 0b01)){
+        if(!(getUserAccess(*me, &chat->userList) & 0b01)){
             printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.ban, ANSI_COLOR_RESET);
             return CLI_NOPERM;
         }
@@ -378,6 +381,9 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }else{
             printf(ANSI_COLOR_RED"Failed to connect"ANSI_COLOR_RESET": irregular answer, error code: %i\n", server_access);
         }
+    } else if(!strcmp(comm[0], "mkchat")){
+        int index = pushChatToCL(&cl, initChat(0x0));
+        getChatChainByIndex(&cl, index)->name = strvp(comm[1]);
     }
     else {
         printf("%s (\'%s\')\n", strStorage.error.command_not_found, comm[0]);
@@ -426,7 +432,7 @@ int handleCLI(struct Chat *chat, int *me){
             else if(c == 8) counter -= 2;
             else input[++counter] = c;
         }while(c != '\n');
-        if(!(getUserAccess(me, &chat->userList) & 0b10)){
+        if(!(getUserAccess(*me, &chat->userList) & 0b10)){
             printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.muted, ANSI_COLOR_RESET);
             return CLI_NOPERM;
         }
@@ -457,25 +463,27 @@ int main(int argc, char **argv){
         }
     }
     loadLMFromFile(langPath, &strStorage);
-    printf("locale: \'%s\'\n", strStorage.details.locale);
+    // printf("locale: \'%s\'\n", strStorage.details.locale);
     setlocale(LC_ALL, strStorage.details.locale);
     printf("%s\n", strStorage.output.welcome); //Welcome!
     /* main code */
    int me = 0;
-   struct Chat chat = initChat(NULL);
-   chat.userList.access = 0xffffffff;
-   chat.roler.role.access = 0xffffffff;
-   addUserToRole(&chat.roler, 0, 0, &chat.userList);
-   addRole(&chat.roler, "Ban list", 0x0);
+   cl.chat = initChat(0x0);
+   cl.chat.userList.access = 0xffffffff;
+   cl.chat.roler.role.access = 0xffffffff;
+   cl.name = strvp("local");
+   addUserToRole(&cl.chat.roler, 0, 0, &cl.chat.userList);
+   addRole(&cl.chat.roler, "Ban list", 0x0);
    while(1){
-    for(int i = last; i < getMessagesCount(&chat); i++){
-            struct Message mes = getMessage(&chat, i); 
-            printf("(%i)%s@[system]: %s\n\t%s:<%I64i>\n", i, getUsernameByID(mes.userid, &chat.userList), mes.content, strStorage.output.sended ,mes.date);
-            last = i+1;
-            if(last == getMessagesCount(&chat)) printf("\n");
-    }
-    printf("%s@[sys]: ", getUsernameByID(me, &chat.userList));
-    int code = handleCLI(&chat, &me);
+       struct ChatList *cur = getChatChainByIndex(&cl, currentChat);
+       for(int i = last; i < getMessagesCount(&cur->chat); i++){
+               struct Message mes = getMessage(&cur->chat, i); 
+               printf("(%i)%s@[%s]: %s\n\t%s:<%I64i>\n", i, getUsernameByID(mes.userid, &cur->chat.userList), cur->name, mes.content, strStorage.output.sended ,mes.date);
+               last = i+1;
+               if(last == getMessagesCount(&cur->chat)) printf("\n");
+       }
+    printf("%s@[%s]: ", getUsernameByID(me, &cur->chat.userList), cur->name);
+    int code = handleCLI(&cur->chat, &me);
     if(code < CLI_ERRF) last ++;
     else if(code == CLI_EXIT){
         printf("%s\n", strStorage.output.exit);

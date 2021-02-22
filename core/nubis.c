@@ -71,4 +71,9 @@ int csseek(struct NCStream stream, int offset, int origin){
     if(stream.pos < 0 || stream.pos >= stream.STREAM_MAX) return -1;
     else return 0;
 }
+char *strvp(const char *str){
+    char *buf = (char*)malloc(strlen(str));
+    strcpy(buf, str);
+    return buf;
+}
 #endif

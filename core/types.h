@@ -5,7 +5,7 @@
 // basic
 struct UserList{
     char *name;
-    #ifdef ENABLE_ACCESS
+    #ifndef DISABLE_ACCESS
      int access;
     #endif
     struct UserList *next;
@@ -41,5 +41,11 @@ struct Chat{
     struct UserList userList;
     struct MessageList messages;
     struct Roler roler;
+};
+struct ChatList{
+    struct ChatList *next;
+    char *name;
+
+    struct Chat chat;
 };
 #endif
