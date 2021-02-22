@@ -488,7 +488,9 @@ int main(int argc, char **argv){
     else if(code == CLI_EXIT){
         printf("%s\n", strStorage.output.exit);
         // destroyUL(&chat.userList);
-        closeServer(0);
+        for(int i = 0; i < getChatChainLen(&cl); i++){
+            closeServer(i);
+        }
         break;
     }else if(code == CLI_ERRF){
         printf("Fail: command error. Check all commands\n");
