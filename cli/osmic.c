@@ -47,8 +47,8 @@ struct LangMap strStorage;
 #endif
 //Global variables
 int last = 0;
-int currentChat = 0;
-struct ChatList cl = {0x0, 0x0, 0x0};
+int currentChat = 0, lastServer = 0;
+struct ChatList cl = {0x0, 0x0, 0x0, 0x0};
 
 int handleCommand(char comm[32][16], struct Chat *chat, int *me){
     if(!strcmp(comm[0], "exit") || !strcmp(comm[0], "q"))
@@ -330,9 +330,11 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }
         int server_access = setServer(comm[1], atoi(comm[2]));
         if (server_access == OSSA_AUTH_FREE_MAC){
-            printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET" (MAC-open chat)\nUser ID: %i\n", authServer("",""));
+            {printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET" (MAC-open chat)\nUser ID: %i\n", authServer("",""));
+                getChatChainByIndex(&cl, currentChat)->serverID = lastServer++;}
         }else if(server_access == OSSA_AUTH_FREE_IP4){
-            printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET" (IPv4-open chat)\nUser ID: %i\n", authServer("",""));
+            {printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET" (IPv4-open chat)\nUser ID: %i\n", authServer("",""));
+                getChatChainByIndex(&cl, currentChat)->serverID = lastServer++;}
         }else if(server_access == OSSA_AUTH_PWD_MAC){
             printf(ANSI_COLOR_GREEN"Accepted"ANSI_COLOR_RESET" (MAC-Chat with password)\nPassword: ");
             char c = 0;
@@ -347,7 +349,8 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong password\n");
                 return -1;
             }else{
-                printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
+                printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
+                getChatChainByIndex(&cl, currentChat)->serverID = lastServer++;
             }
         }else if(server_access == OSSA_AUTH_PWD_UN){
             printf(ANSI_COLOR_GREEN"Accepted"ANSI_COLOR_RESET" (Usernames-Chat with password)\nUsername: ");
@@ -376,7 +379,8 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong username or password\n");
                 return -1;
             }else{
-                printf(ANSI_COLOR_GREEN"Connected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
+                printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
+                getChatChainByIndex(&cl, currentChat)->serverID = lastServer++;
             }
         }else{
             printf(ANSI_COLOR_RED"Failed to connect"ANSI_COLOR_RESET": irregular answer, error code: %i\n", server_access);
@@ -384,6 +388,19 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
     } else if(!strcmp(comm[0], "mkchat")){
         int index = pushChatToCL(&cl, initChat(0x0));
         getChatChainByIndex(&cl, index)->name = strvp(comm[1]);
+    } else if(!strcmp(comm[0], "lschat")){
+        printf("(ID)\tName\tUsers\tMessage\n");
+        for(int i = 0; i < getChatChainLen(&cl); i++){
+            printf(
+                "%s(%c)"ANSI_COLOR_RESET" %i\t%s\t%i\t%i\n",
+                getChatChainByIndex(&cl, i)->serverID!=-1?ANSI_COLOR_GREEN:ANSI_COLOR_YELLOW,
+                currentChat == i ? '*':'.',
+                i,
+                getChatChainByIndex(&cl, i)->name,
+                getUsersCount(&getChatChainByIndex(&cl, i)->chat),
+                getMessagesCount(&getChatChainByIndex(&cl, i)->chat)
+            );
+        }
     }
     else {
         printf("%s (\'%s\')\n", strStorage.error.command_not_found, comm[0]);
@@ -472,6 +489,7 @@ int main(int argc, char **argv){
    cl.chat.userList.access = 0xffffffff;
    cl.chat.roler.role.access = 0xffffffff;
    cl.name = strvp("local");
+   cl.serverID = -1;
    addUserToRole(&cl.chat.roler, 0, 0, &cl.chat.userList);
    addRole(&cl.chat.roler, "Ban list", 0x0);
    while(1){

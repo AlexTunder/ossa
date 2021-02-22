@@ -2,8 +2,8 @@
 #ifndef CCHAT_BASE_H
  #include "base.h"
 #endif
-#ifndef CCHAT_BASE_C
 
+#ifndef CCHAT_BASE_C
 #define CCHAT_BASE_C
 
 struct FileSync initFileSync(const char *path, const char *cfgName){
@@ -275,13 +275,16 @@ struct ChatList *getChatChainByIndex(struct ChatList *root, int index){
 int getChatChainLen(struct ChatList *root){
     if(root->next == 0x0)
         return 1;
-    else return getChatChainLen(root->next);
+    else return getChatChainLen(root->next)+1;
 }
 int pushChatToCL(struct ChatList *root, struct Chat chat){
     if(root->next == 0x0){
         root->next = (struct ChatList*) malloc(sizeof(struct ChatList));
         root->next->chat = chat;
         root->next->next = 0x0;
+        #ifdef OSSA_ASYNC
+        root->next->serverID = -1;
+        #endif
         return 1;
     }else return pushChatToCL(root->next, chat)+1;
 }
@@ -297,6 +300,13 @@ int getUserAccess(int userid, struct UserList *userList){
         else return -1;
     }
     return counter->access;
+}
+#endif
+#ifdef OSSA_ASYNC
+struct ChatList *getChatFromServerID(struct ChatList *root, int index){
+    if(root->serverID == index) return root;
+    else if(root->next == 0x0) return 0x0;
+    else return getChatFromServerID(root->next, index);
 }
 #endif
 #ifdef stdChatEnable_Workspace

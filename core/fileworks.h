@@ -1,9 +1,9 @@
 #pragma once
 #ifndef CCHAT_TYPES_H
- #include "types.h"
+ #include "./types.h"
 #endif
 #ifndef CCHAT_BASE_H
-#include "base.h"
+#include "./base.h"
 #endif
 #ifndef CCHAT_USE_SRC
  #ifndef CCHAT_FILEWORKS_H

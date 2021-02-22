@@ -262,7 +262,9 @@ int destroyML(struct MessageList *ml);
 struct ChatList *getChatChainByIndex(struct ChatList *root, int index);
 int getChatChainLen(struct ChatList *root);
 int pushChatToCL(struct ChatList *root, struct Chat chat);
-
+#ifdef OSSA_ASYNC
+struct ChatList *getChatFromServerID(struct ChatList *root, int index);
+#endif
  #ifdef CCHAT_USE_SRC
   #include "./base.c"
  #endif

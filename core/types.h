@@ -45,6 +45,9 @@ struct Chat{
 struct ChatList{
     struct ChatList *next;
     char *name;
+    #ifdef OSSA_ASYNC
+     int serverID;
+    #endif
 
     struct Chat chat;
 };
