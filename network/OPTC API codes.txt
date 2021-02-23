@@ -1,12 +1,14 @@
+connection stage
 000f0010 - hardware info (connect stage)
 000faa1c - open MAC-addr auth enable
 000faf1c - open IP-addr auth enable
 000f0010 - username and password auth enable
 000f0a10 - MAC and password auth enable
-
+Auth stage
 000f001c - auth try
 000f0a1c - auth success
 000f0a0c - auth failed
+//User management
 5c0f001c - push user
 faafff1c - unauthed
 000f0b1c - new user pushed successful

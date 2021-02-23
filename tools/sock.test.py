@@ -27,15 +27,15 @@ while True:
         words = data.split()
         print(words)
         if words[1] == b'000f0010':
-            conn.send(b"OSSA-PTC: 000f0010\n")
-            print("OSSA-INDENT")
+            conn.send(b"OSSA-PTC: 000f0010\r")
+            # print("OSSA-INDENT")
         elif words[1] == b'000f001c':
             appendD = 1
             for i in range(0, len(users)):
                 if (users[i] == words[3]):
                     appendD = 0
                     if hashs[i] == words[5]:
-                        snd = b"OSSA-PTC: 000f0a1c\rUserid: "+ str(i).encode() +b'\n'
+                        snd = b"OSSA-PTC: 000f0a1c\nUserid: "+ str(i).encode() +b'\r'
                         print("send:", snd)
                         conn.send(snd)
                         #now, bind addr_active with addr_unames
@@ -45,9 +45,9 @@ while True:
                                 break
                         break
                     else:
-                        conn.send(b'OSSA-PTC: 000f0a0c\n')
+                        conn.send(b'OSSA-PTC: 000f0a0c\r')
             if (appendD == 1):
-                conn.send(b"OSSA-PTC: f00f0f1c\n")
+                conn.send(b"OSSA-PTC: f00f0f1c\r")
         elif words[1] == b'5c0f001c':
             #reg new user
             reg = 0
@@ -60,7 +60,7 @@ while True:
                                 index = users.append(words[3])
                                 hashs.append(words[6])
                                 access.append(b'ALL')
-                                snd = b"OSSA-PTC: 000f0b1c\rUID: "+ str(index).encode() +b'\rERROR: 0\n'
+                                snd = b"OSSA-PTC: 000f0b1c\nUID: "+ str(index).encode() +b'\nERROR: 0\r'
                                 conn.send(snd)
                                 reg = 1
                                 break
@@ -71,28 +71,28 @@ while True:
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
-                            conn.send(b'OSSA-PTC: 0000f11a\rTotal: 15\n')
+                            conn.send(b'OSSA-PTC: 0000f11a\nTotal: 15\n')
                             print("MO")
                         else:
-                            conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
+                            conn.send(b'OSSA-PTC: 0000f10a\nERROR: 51\n')
                             print("MF")
         elif words[1] == b'000bf11a':
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
-                            conn.send(b'OSSA-PTC: 000bf11f\rCount: 1\rContent:next\r{\"body\":\"Hi!\",\"date\":\"16666213\",\"sender\":\"1\"}\n')
+                            conn.send(b'OSSA-PTC: 000bf11f\nCount: 1\nContent:next\n{\"body\":\"Hi!\",\"date\":\"16666213\",\"sender\":\"1\"}\n')
                             print("MU")
                         else:
-                            conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
+                            conn.send(b'OSSA-PTC: 0000f10a\nERROR: 51\n')
                             print("MF")
         elif words[1] == b'000ba110':
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
-                            conn.send(b'OSSA-PTC: 002ba110\rCount: 3\rContent:next\r{\"username\":\"system\"}\rContent:next\r{\"username\":\"16666213\"}\rContent:next\r{\"username\":\"1\"}\n')
+                            conn.send(b'OSSA-PTC: 002ba110\nCount: 3\nContent:next\n{\"username\":\"system\"}\nContent:next\n{\"username\":\"16666213\"}\nContent:next\n{\"username\":\"1\"}\n')
                             print("MU")
                         else:
-                            conn.send(b'OSSA-PTC: 0000f10a\rERROR: 51\n')
+                            conn.send(b'OSSA-PTC: 0000f10a\nERROR: 51\n')
                             print("MF")
         else:
             print("UnSy")

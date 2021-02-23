@@ -1,6 +1,7 @@
 #define AIRLIB_PATH "/"
 #define ENABLE_ACCESS   
 #define SETTINGS
+#define OSSA_ASYNC
 // #include "..\airlib\OpenCppNet\Socket.hpp"
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,7 @@
  #include<conio.h>
 #endif
 
+#include "../core/ptcload.h"
 #include "../core/osmic.h"
 #include "../core/envl.c"
 #include "../network/api.h"
@@ -135,6 +137,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             }
         }else if(!strcmp(comm[1], "chat")){
             currentChat = atoi(comm[2]);
+            useServer(getChatChainByIndex(&cl, currentChat)->serverID);
         }
         else {printf("bad \'set\' parameter (%s)\n", comm[1]);return CLI_CNF;}
     } else if(!strcmp(comm[0], "view")){
@@ -347,6 +350,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             server_access = authServer("", pwd);
             if(server_access < 0){
                 printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong password\n");
+                closeServer(lastServer);
                 return -1;
             }else{
                 printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
@@ -376,11 +380,16 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             #endif
             server_access = authServer(uname, pwd);
             if(server_access < 0){
-                printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong username or password\n");
+                printf(ANSI_COLOR_RED"\nFailed to login chat"ANSI_COLOR_RESET": wrong username or password (%i)\n", server_access);
+                closeServer(lastServer);
                 return -1;
             }else{
                 printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
                 getChatChainByIndex(&cl, currentChat)->serverID = lastServer++;
+                // getChatChainByIndex(&cl, currentChat)->chat.messages
+                syncMessages(&getChatChainByIndex(&cl, currentChat)->chat.messages);
+                syncUsers(&getChatChainByIndex(&cl, currentChat)->chat.userList);
+                syncRoles(&getChatChainByIndex(&cl, currentChat)->chat.roler);
             }
         }else{
             printf(ANSI_COLOR_RED"Failed to connect"ANSI_COLOR_RESET": irregular answer, error code: %i\n", server_access);
@@ -400,6 +409,11 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 getUsersCount(&getChatChainByIndex(&cl, i)->chat),
                 getMessagesCount(&getChatChainByIndex(&cl, i)->chat)
             );
+        }
+    } else if(!strcmp(comm[0], "disconn")){
+        if(getChatChainByIndex(&cl, currentChat)->serverID != -1){
+            closeServer(getChatChainByIndex(&cl, currentChat)->serverID);
+            getChatChainByIndex(&cl, currentChat)->serverID = -1;
         }
     }
     else {
