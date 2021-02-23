@@ -14,8 +14,8 @@ endif
 CC_FLAG += -std=c99
 
 CBase:
-	@echo [MF] core/base.c
-	@gcc -c core/base.c -o lib/libossa.a
+	@echo [CC] core/base.c
+	@$(CC) -c core/base.c -o lib/libossa.a -std=c99
 net:
 	@echo [MF] network/osb
 	@make -C ./network -s
