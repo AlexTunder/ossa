@@ -11,6 +11,7 @@ else
 	gocompl = 'go'
 	CC_FLAG += -lpthread
 endif
+CC_FLAG += -std=c99
 
 CBase:
 	@echo [MF] core/base.c
