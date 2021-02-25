@@ -27,7 +27,7 @@ while True:
         words = data.split()
         print(words)
         if words[1] == b'000f0010':
-            conn.send(b"OSSA-PTC: 000f0010\r")
+            conn.send(b"OSSA-PTC: 000f0010\n\0")
             # print("OSSA-INDENT")
         elif words[1] == b'000f001c':
             appendD = 1
@@ -35,7 +35,7 @@ while True:
                 if (users[i] == words[3]):
                     appendD = 0
                     if hashs[i] == words[5]:
-                        snd = b"OSSA-PTC: 000f0a1c\nUserid: "+ str(i).encode() +b'\r'
+                        snd = b"OSSA-PTC: 000f0a1c\nUserid: "+ str(i).encode() +b'\0'
                         print("send:", snd)
                         conn.send(snd)
                         #now, bind addr_active with addr_unames
@@ -45,9 +45,9 @@ while True:
                                 break
                         break
                     else:
-                        conn.send(b'OSSA-PTC: 000f0a0c\r')
+                        conn.send(b'OSSA-PTC: 000f0a0c\0')
             if (appendD == 1):
-                conn.send(b"OSSA-PTC: f00f0f1c\r")
+                conn.send(b"OSSA-PTC: f00f0f1c\0")
         elif words[1] == b'5c0f001c':
             #reg new user
             reg = 0
@@ -60,13 +60,13 @@ while True:
                                 index = users.append(words[3])
                                 hashs.append(words[6])
                                 access.append(b'ALL')
-                                snd = b"OSSA-PTC: 000f0b1c\nUID: "+ str(index).encode() +b'\nERROR: 0\r'
+                                snd = b"OSSA-PTC: 000f0b1c\nUID: "+ str(index).encode() +b'\nERROR: 0\0'
                                 conn.send(snd)
                                 reg = 1
                                 break
                     break
             if(reg == 0):
-                conn.send(b'OSSA-PTC: faafff1c\nERROR: 5\r')
+                conn.send(b'OSSA-PTC: faafff1c\nERROR: 5\0')
         elif words[1] == b'4c0f001c':
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):

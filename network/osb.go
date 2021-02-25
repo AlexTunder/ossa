@@ -64,7 +64,7 @@ func setServer(host *C.char, port C.int) C.int {
 
 	fmt.Fprintf(serverData.serverFD, "OSSA-PTC: 000f0010\nHardware: %v\r", MAC)
 
-	message, _ := bufio.NewReader(serverData.serverFD).ReadString('\r')
+	message, _ := bufio.NewReader(serverData.serverFD).ReadString('\000')
 	lines := strings.Split(message, "\n")
 	words := strings.Split(lines[0], " ")
 	mainStream = append(mainStream, serverData)
@@ -87,6 +87,7 @@ func setServer(host *C.char, port C.int) C.int {
 	}
 
 	// Unknowen auth method
+	fmt.Printf("Message: %v\n", lines)
 	return 0x5d
 }
 
@@ -95,7 +96,7 @@ func authServer(username *C.char, password *C.char) C.int {
 	hashPWD := md5.Sum([]byte(C.GoString(password)))
 	// fmt.Printf("Using %v user with %x hash of password\n", C.GoString(username), hashPWD)s
 	fmt.Fprintf(mainStream[Current].serverFD, "OSSA-PTC: 000f001c\nUsername: %v\nPwd-hash: %x\r", C.GoString(username), hashPWD)
-	message, _ := bufio.NewReader(mainStream[Current].serverFD).ReadString('\r')
+	message, _ := bufio.NewReader(mainStream[Current].serverFD).ReadString('\000')
 	lines := strings.Split(message, "\n")
 	words := strings.Split(lines[0], " ")
 	
@@ -139,7 +140,7 @@ func closeServer(serverID C.int) C.int {
 //export useraddServer
 func useraddServer(name *C.char, pwd *C.char) C.int {
 	fmt.Fprintf(mainStream[Current].serverFD, "OSSA-PTC: 5c0f001c\nUsername: %v\nPwd-clear: %v\r", C.GoString(name), C.GoString(pwd))
-	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\r')
+	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\000')
 	// fmt.Println(message)
 	if err != nil {
 		return -1
@@ -173,7 +174,7 @@ func sendMessage(mes C.struct_Message) C.int {
 	jsonSend := "a"
 	jsonSend = fmt.Sprintf("{\"body\":\"%v\",\"date\":\"%v\",\"sender\":\"%v\"}", C.GoString(mes.content), mes.date, mes.userid)
 	fmt.Fprintf(mainStream[Current].serverFD, "OSSA-PTC: 4c0f001c\nlen:%v\n%v\n", len(jsonSend), jsonSend)
-	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\r')
+	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\000')
 	if err != nil {
 		return -1
 	}
@@ -182,7 +183,7 @@ func sendMessage(mes C.struct_Message) C.int {
 	if words[0] != "OSSA-PTC:" {
 		return -3
 	}
-	// fmt.Printf("'%v'\r'%v'\r'%v'\n", words, lines, words[1])
+	// fmt.Printf("'%v'\000'%v'\000'%v'\n", words, lines, words[1])
 	if words[1] == "0000f10a" {
 		for i := 1; i < len(lines)-1; i++ {
 			words = strings.Split(lines[i], " ")
@@ -211,7 +212,7 @@ func sendMessage(mes C.struct_Message) C.int {
 //export syncMessages
 func syncMessages(ml *C.struct_MessageList) C.int {
 	fmt.Fprintf(mainStream[Current].serverFD, "OSSA-PTC: 000bf11a\nFrom: %v\n", C.getLastFromML(ml).date)
-	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\r')
+	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\000')
 	message = strings.Trim(message, "\n")
 
 	if err != nil {
@@ -294,7 +295,7 @@ func syncRoles(roler C.struct_Roler) C.int {
 func syncUsers(userList *C.struct_UserList) C.int {
 
 	fmt.Fprintf(mainStream[Current].serverFD, "OSSA-PTC: 000ba110\n")
-	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\r')
+	message, err := bufio.NewReader(mainStream[Current].serverFD).ReadString('\000')
 	message = strings.Trim(message, "\n")
 
 	if err != nil {

@@ -18,7 +18,7 @@ napi:
 	@echo [GO] Building OSB
 	@$(gocompl) build -buildmode=c-archive ./osb.go
 	@echo [FS] Moving protocol static lib to ossa/lib
-	@$(mv) osb.a ../lib/libossac.a
+	@$(mv) ./osb.a ../lib/libossac.a
 	@echo [FS] cleaning up
 	@$(rm) osb.h
 napi-cp:
