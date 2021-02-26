@@ -10,18 +10,24 @@ For fast navigation use :help #[command]
 | Name | Syntax | Description |
 | ---- | ------ | ----------- |
 | :exit | :exit | Exit from chat |
-| :drop | :drop (-chat [filename]) (-users [filename]) (-roles [filename]) | write chat data to 3 files. You can manage filenames with opcional arguments. By default using 'users.list', 'roles.list' and [time of 1st message]-[time of last message] files |
-| :useradd | :useradd [username] | Add new user to user list |
-| :roleadd | :roleadd [role name] | Add new role to roler |
-| :view | :view [all/tail [count of messages]] | view all chat history or only tail of N messages |
-| :inrole | :inrole [userid] | Check user with USERID for role |
-| :ban | :ban [userid] | Ban user with USERID |
-| :long | :long [stop-char] | enable multi-line typing while you not press [stop-char]. Use ~as stop-char, cuz it's best one |
-| :load | :load (-chat [filename]) (-users [filename]) (-roles [filename]) | read chat data from 3 files. You can manage filenames with opcional arguments. By default using 'users.list', 'roles.list' and [time of 1st message]-[time of last message] files |
+| :drop | :drop `(-chat [filename]) (-users [filename]) (-roles [filename])` | write chat data to 3 files. You can manage filenames with opcional arguments. By default using 'users.list', 'roles.list' and [time of 1st message]-[time of last message] files |
+| :useradd | :useradd `username` | Add new user to user list |
+| :roleadd | :roleadd `role name` | Add new role to roler |
+| :view | :view `all/tail n` | view all chat history or only tail of `n` messages |
+| :inrole | :inrole `userid` | Check user with `userid` for role |
+| :ban | :ban `userid` | Ban user with `userid` |
+| :long | :long `stop-char` | enable multi-line typing while you not press `stop-char`. Use `~` as stop-char, cuz it's best one |
+| :load | :load `(-chat [filename]) (-users [filename]) (-roles [filename])` | read chat data from 3 files. You can manage filenames with opcional arguments. By default using 'users.list', 'roles.list' and [time of 1st message]-[time of last message] files |
 | :lsuser | :lsuser | View full list of with their's IDs |
-| :lsrole | :lsrole (role ID) | view full info about role(s). If you type just ':lsrole' it's will displayed full list of roles woth full info |
+| :lsrole | :lsrole `roleid` | view full info about role(s). If you type just ':lsrole' it's will displayed full list of roles woth full info |
 | :set | view next pont | allow to manage roles, users, access and others. View more in next point |
-| :lang | :lang rm/add/edit/list | Manage languages |
+| :dload | :dload `tag` `name` | Download `name` package with `tag` |
+| :env-ctl | :env-ctl `update` | Manage eviroments |
+| :conn | :conn `ip` `port` `(-p @proto)` | Connect to server on `port` and bind this chat with it. In future you'll can use `-p` flag for choosing protocol |
+| :disconn | :disconn | Disconnect current chat from server |
+| :mkchat | :mkchat `name` | Make new chat with `name` |
+| :lschat | :lschat | Get all stat about all chats |
+
 
 # Set
 For every of this command you should to use next structure: ```:set parameter```. Every command can affect to chat working 
@@ -66,6 +72,13 @@ You can change user permanently, withoit login if chat-ruler allow this. you sho
 
 P.S. You also can change user #0 name ("system" by default)
 
+## Chat
+You can change current chat. For this you should to change `currentChat` enviroment variable. Use it:
+```
+user@chat> :set chat id
+```
+You can find ID via `:lschat` command
+
 # Languages (in development)
 You can manage languages, localization, string containers and others. So, you also can customize your layout
 ## Basics
@@ -77,6 +90,7 @@ All structure is based on dynamic-translation and smart-translation (in ``bion1c
 | ```char *``` | translation | "lang.section.phrase" translation. aka ```langblock.desc``` |
 | ```struct LangContainer*``` | next | Pointer to the next translation block. |
 But don't worry: every low-level stuff is function's work
+
 ## commands
 ### rm ```fieldname```
 Deleting ```fieldname``` translation block.
@@ -116,12 +130,51 @@ user@chat> :lang list
     ------------------------------------
 user@chat>
 ```
+# DLoad
+Useful utility for loading new components of OSMIC. You can download only languages packages and protocols yet, but soon `src`, `scr` and `utils` will be avialable
+## Tags
+It's software tags. For example, `proto` - is all protocols group. It's uses for navigate promgramm. All tags:
+
+|Name|Description|
+|---|----|
+|`proto`|Dynamic linkable protocols|
+|`src`|Source code|
+|`lang`|Languages packages|
+|`scr`|Eviroment scripts|
+|`utils`|Additional software|
+# Conn
+It's simple: It's just connect you to server. If server require password or username you should to enter it. Example:
+```
+user@chat> :conn 127.0.0.1 8000
+Accepted (Usernames-Chat with password)
+Username: user
+Password:
+Connected
+User ID: 4
+Loading messages...
+Loading users...
+Loading roles...
+alex@chat: Welcome to out chat!
+    <1 sec. left>
+user@chat> 
+```
+# Lschat
+Show all chats in this session. It' looks like 
+```
+(ID)    Name    Users   Message
+(.) 0   local   0       0
+(*) 1   net     0       0
+(.) 2   another 0       0
+```
+In active chat you can see start around ID.
+
+Brackets have only 2 colors variants: green and yellow. If bracket is green it's mean your this chat is connected to server. If it's yellow it's mean chat is local-only
 # Developer
 Almost of this command needs only for debugging or testing, but users also can use it
 ## Recompile
 This command useful only if you have sources of OSMIC ION realese and 'make' with 'gcc'. Else it's will ends sad :c
 ```
-user@chat> :recompile (-all) (-updater) (-norun) (-ma) (-optimal) (-debug)
+user@chat> :recompile (-all) (-updater) (-norun) (-ma) (-optimal) (-debug) (-spb)
 ```
 ### -all
 Use it if you want to make AND updater AND OSMIC
@@ -134,7 +187,9 @@ Buld ONLY OSMIC
 ### -optimal
 Build with optimization
 ### -debug
-Beuld with debug info
+Build with debug info
+### -spn
+Shared Protocols Building
 ## Conf
 This is default OSMIC settings. You can change it and view. Every commands have next syntax:
 ```
@@ -152,6 +207,11 @@ Table of all configs names
 | 0 | runtime-n | Enable runtime network sync |
 | 0 | native-aud | Enable native audion support |
 
+Now config table have a special colors:
+- cyan - forced enabled. This option is enabled on code level. You can't toggle it
+- red - forced disabled. This option is enabled on code level. You can't toggle it
+- green - enabled
+- yellow - enabled, but conflicting and don't work
 # Access
 Access system - is system of checking and merging of bits masks, so it's fast and secure. Bit's position in the byte calls 'access flag'. Every action in chat requere some kind of access. You can make your own access if you want, but OSMIC also have reserved access flags. Here table of this
 | Name | Access flag | HEX view | Full bit | Description |

@@ -263,7 +263,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Native audio support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NAUDIO_E ? '*' : ' ');
                     printf("["ANSI_COLOR_RED"*"ANSI_COLOR_RESET"] Runtime sending data\n"/*, CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DYNLANMP ? '*' : ' '*/);
                     //Descriptions
-                    printf("\n["ANSI_COLOR_CYAN"*"ANSI_COLOR_RESET"] -already compiled; enables in code level\n["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"] -enabled flag\n["\
+                    printf("\n["ANSI_COLOR_CYAN"*"ANSI_COLOR_RESET"] - already compiled; enables in code level\n["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"] - enabled flag\n["\
                     ANSI_COLOR_RED"*"ANSI_COLOR_RESET"] - disabled on code level\n["ANSI_COLOR_YELLOW"*"ANSI_COLOR_RESET"] - Enabled, but not supported (blocked)\n");
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
