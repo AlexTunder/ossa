@@ -93,6 +93,7 @@ func setServer(host *C.char, port C.int) C.int {
 
 //export authServer
 func authServer(username *C.char, password *C.char) C.int {
+	// fmt.Printf("[debug]Password: %v\n", C.GoString(password))
 	hashPWD := md5.Sum([]byte(C.GoString(password)))
 	// fmt.Printf("Using %v user with %x hash of password\n", C.GoString(username), hashPWD)s
 	fmt.Fprintf(mainStream[Current].serverFD, "OSSA-PTC: 000f001c\nUsername: %v\nPwd-hash: %x\r", C.GoString(username), hashPWD)
@@ -103,7 +104,7 @@ func authServer(username *C.char, password *C.char) C.int {
 	if words[0] != "OSSA-PTC:" {
 		// OSSA_INVALID_PROTO
 		
-		fmt.Printf("uP: %v\n", message)
+		// fmt.Printf("uP: %v\n", message)
 		return -3
 	}
 	// fmt.Printf("getted lines: %v\n",lines)

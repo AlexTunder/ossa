@@ -374,7 +374,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             char *pwd = (char*)malloc(1024);
             for (int i = 0; i < 1024; i++){
                 c = getch();
-                if(c == 13) break;
+                if(c == 13) {pwd[i] = 0; break;}
                 else pwd[i] = c;
             }
             #endif
@@ -387,8 +387,11 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 printf(ANSI_COLOR_GREEN"\nConnected"ANSI_COLOR_RESET"\nUser ID: %i\n", server_access);
                 getChatChainByIndex(&cl, currentChat)->serverID = lastServer++;
                 // getChatChainByIndex(&cl, currentChat)->chat.messages
+                printf("Loading messages...\n");
                 syncMessages(&getChatChainByIndex(&cl, currentChat)->chat.messages);
+                printf("Loading users...\n");
                 syncUsers(&getChatChainByIndex(&cl, currentChat)->chat.userList);
+                printf("Loading roles...\n");
                 syncRoles(&getChatChainByIndex(&cl, currentChat)->chat.roler);
             }
         }else{
