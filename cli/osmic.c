@@ -420,6 +420,18 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             closeServer(getChatChainByIndex(&cl, currentChat)->serverID);
             getChatChainByIndex(&cl, currentChat)->serverID = -1;
         }
+    } else if(!strcmp(comm[0], "install")){
+        if(!strcmp(comm[1], "proto")){
+            //Downloading proto from https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/[proto]
+            // curl [link] -o [target]
+            char *url = (char*)malloc(strlen("curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/ -o ")+strlen(comm[2])+strlen(comm[2]));
+            sprintf(url, "curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/%s -o %s", comm[2], comm[2]);
+            system(url);
+        }else if(comm[1], "lang"){
+            char *url = (char*)malloc(strlen("curl https://raw.githubusercontent.com/AlexTunder/ossa/master/languages/ -o ")+strlen(comm[2])+strlen(comm[2])+10);
+            sprintf(url, "curl https://raw.githubusercontent.com/AlexTunder/ossa/master/languages/%s.lang -o %s.lang", comm[2], comm[2]);
+            system(url);
+        }
     }
     else {
         printf("%s (\'%s\')\n", strStorage.error.command_not_found, comm[0]);
