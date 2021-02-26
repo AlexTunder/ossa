@@ -362,7 +362,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             char *uname = (char*)malloc(1024);
             for (int i = 0; i < 1024; i++){
                 c = getchar();
-                if(c == '\n') break;
+                if(c == '\n') {uname[i] = 0; break;}
                 else uname[i] = c;
             }
             printf("Password: ");
@@ -372,6 +372,8 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             char *pwd = getpass("");
             #else
             char *pwd = (char*)malloc(1024);
+            for(int i = 0; i < 1024; i++)
+                pwd[i] = 0;
             for (int i = 0; i < 1024; i++){
                 c = getch();
                 if(c == 13) {pwd[i] = 0; break;}
