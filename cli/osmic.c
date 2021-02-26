@@ -9,6 +9,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <locale.h>
+#include <sys/stat.h>
 #ifndef __WIN32
  #include <unistd.h>
 #else
@@ -48,6 +49,7 @@ struct LangMap strStorage;
     #define ANSI_COLOR_RESET   "\x1b[0m"
 #endif
 //Global variables
+char *langPath;
 int last = 0;
 int currentChat = 0, lastServer = 0;
 struct ChatList cl = {0x0, 0x0, 0x0, 0x0};
@@ -246,10 +248,23 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     printf(" %x\n", CCHAT_GLOBAL_SETTINGS);
                 }else{
                     printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Dropping without cryptographi\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NOCRYPTO ? '*' : ' ');
-                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DROPOCWM ? '*' : ' ');
-                    printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Native access support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_ACCESS_E ? '*' : ' ');
+                    printf("["ANSI_COLOR_YELLOW"%c"ANSI_COLOR_RESET"] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DROPOCWM ? '*' : ' ');
+                    #ifdef DISABLE_ACCESS
+                     printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Native access support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_ACCESS_E ? '*' : ' ');
+                    #else
+                     printf("["ANSI_COLOR_CYAN"*"ANSI_COLOR_RESET"] Native access support\n");
+                    #endif
+                    #ifdef OSSA_ASYNC
+                     printf("["ANSI_COLOR_CYAN"*"ANSI_COLOR_RESET"] Async mode\n");
+                    #else
+                     printf("["ANSI_COLOR_CYAN" "ANSI_COLOR_RESET"] Async mode\n");
+                    #endif
                     printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Runtime sending data\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_RUNTIMEN ? '*' : ' ');
                     printf("["ANSI_COLOR_GREEN"%c"ANSI_COLOR_RESET"] Native audio support\n", CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_NAUDIO_E ? '*' : ' ');
+                    printf("["ANSI_COLOR_RED"*"ANSI_COLOR_RESET"] Runtime sending data\n"/*, CCHAT_GLOBAL_SETTINGS & CCHAT_FLAG_DYNLANMP ? '*' : ' '*/);
+                    //Descriptions
+                    printf("\n["ANSI_COLOR_CYAN"*"ANSI_COLOR_RESET"] -already compiled; enables in code level\n["ANSI_COLOR_GREEN"*"ANSI_COLOR_RESET"] -enabled flag\n["\
+                    ANSI_COLOR_RED"*"ANSI_COLOR_RESET"] - disabled on code level\n["ANSI_COLOR_YELLOW"*"ANSI_COLOR_RESET"] - Enabled, but not supported (blocked)\n");
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
                     // printf("[%c] Drop only chat\n", CCHAT_GLOBAL_SETTINGS & 1 ? '*' : ' ');
@@ -264,9 +279,13 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                         CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_DROPOCWM;
                     else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_DROPOCWM;
                 }else if(!strcmp(comm[2], "native-acc")){
+                    #ifdef DISABLE_ACCESS
                     if(*comm[3] == '0' || *comm[3] == 'n')
                         CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_ACCESS_E;
                     else CCHAT_GLOBAL_SETTINGS |= CCHAT_FLAG_ACCESS_E;
+                    #else
+                     printf(ANSI_COLOR_YELLOW"Unable to change config: soft-const config\n"ANSI_COLOR_RESET);
+                    #endif
                 }else if(!strcmp(comm[2], "runtime-n")){
                     if(*comm[3] == '0' || *comm[3] == 'n')
                         CCHAT_GLOBAL_SETTINGS &= ~CCHAT_FLAG_RUNTIMEN;
@@ -411,8 +430,8 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 currentChat == i ? '*':'.',
                 i,
                 getChatChainByIndex(&cl, i)->name,
-                getUsersCount(&getChatChainByIndex(&cl, i)->chat),
-                getMessagesCount(&getChatChainByIndex(&cl, i)->chat)
+                getUsersCount(&getChatChainByIndex(&cl, i)->chat)-1, /*Without system user*/
+                getMessagesCount(&getChatChainByIndex(&cl, i)->chat)-1 /*Without open-chat message*/
             );
         }
     } else if(!strcmp(comm[0], "disconn")){
@@ -420,7 +439,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             closeServer(getChatChainByIndex(&cl, currentChat)->serverID);
             getChatChainByIndex(&cl, currentChat)->serverID = -1;
         }
-    } else if(!strcmp(comm[0], "install")){
+    } else if(!strcmp(comm[0], "dload")){
         if(!strcmp(comm[1], "proto")){
             //Downloading proto from https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/[proto]
             // curl [link] -o [target]
@@ -437,6 +456,30 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             system(url);
         }else{
             printf(ANSI_COLOR_RED"invalid tag"ANSI_COLOR_RESET": %s\n", comm[1]);
+        }
+    } else if(!strcmp("env-ctl", comm[0])){
+        if(!strcmp("update", comm[1])){
+            loadLMFromFile(langPath, &strStorage);
+        }else if(!strcmp("list", comm[1])){
+            //List all enviroments
+        }
+    } else if(!strcmp("iload", comm[0])){
+        if(!strcmp("proto", comm[1])){
+            printf("loading protocol \'%s\'...\n");
+            struct stat buffer;
+
+            stat(comm[2], &buffer);
+            if(buffer.st_mode & S_IFDIR){
+                // printf("unzipping proto...\n");
+                // char *envmap = (char *)malloc(strlen(comm[2]) + strlen("proto.env"));
+                // char *dllmap = (char *)malloc(strlen(comm[2]) + strlen("proto.dll"));
+                // char *cmdmap = (char *)malloc(strlen(comm[2]) + strlen("comms.cmdkey"));
+                // sprintf(envmap, "%s/proto.env");
+                // sprintf(dllmap, "%s/proto.dll");
+                // sprintf(cmdmap, "%s/comms.cmdkey");
+                // loadDLMFromFile()
+            }
+            //Load shared lib here!
         }
     }
     else {
@@ -494,7 +537,7 @@ int handleCLI(struct Chat *chat, int *me){
         // free(input);
     }
     return 0;
-} 
+}
 
 int main(int argc, char **argv){
     /* Languages */
@@ -502,7 +545,7 @@ int main(int argc, char **argv){
      system("chcp 65001"); //Setting up UTF-8!
     #endif
     /* default settings */
-    char *langPath = (char*)malloc(10240);
+    langPath = (char*)malloc(10240);
     sprintf(langPath, "default.lang");
     /* parsing arguments */
     for(int i = 0; i < argc; i++){

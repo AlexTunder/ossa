@@ -101,12 +101,12 @@ func authServer(username *C.char, password *C.char) C.int {
 	lines := strings.Split(message, "\n")
 	words := strings.Split(lines[0], " ")
 	
-	if words[0] != "OSSA-PTC:" {
-		// OSSA_INVALID_PROTO
+	// if words[0] != "OSSA-PTC:" {
+	// 	// OSSA_INVALID_PROTO
 		
-		// fmt.Printf("uP: %v\n", message)
-		return -3
-	}
+	// 	// fmt.Printf("uP: %v\n", message)
+	// 	return -3
+	// }
 	// fmt.Printf("getted lines: %v\n",lines)
 	if words[1] == "000f0a1c" {
 		words = strings.Split(lines[1], " ")
@@ -232,46 +232,51 @@ func syncMessages(ml *C.struct_MessageList) C.int {
 			words = strings.Split(lines[i], " ")
 			if words[0] == "Count:" {
 				newMes, _ = strconv.Atoi(words[1])
-			}
-			for j := 0; j < newMes; j++{
+			} else if lines[i] == ""{
+				for j := 0; j < newMes; j++{
 
 				//All JSON contained on the next line
 				//Content: {"body":"hello","date":"1774212414","sender":"1"}
-				i++
+					i++
 
-				var itn int = 0
+					var itn int = 0
 
-				//fmt.Printf("Conent detected! %v - is json\n", lines[i])
+					//fmt.Printf("Conent detected! %v - is json\n", lines[i])
 
-				rw001 := strings.Trim(lines[i], "{")
-				rw001 = strings.Trim(rw001, "}")
+					rw001 := strings.Trim(lines[i], "{")
+					rw001 = strings.Trim(rw001, "}")
 
-				jsonParsed := strings.Split(rw001, ",")
-				//fmt.Printf("Parsed data: %v, len: %v\n", jsonParsed, len(jsonParsed))
-				var gettedMes C.struct_Message = C.makeMes(C.CString(""), 0)
-				for j := 0; j < len(jsonParsed)-12; j++ {
-					jsonField := strings.Split(jsonParsed[j], ":")
-					jsonField[0] = strings.Trim(jsonField[0], "\"")
-					jsonField[1] = strings.Trim(jsonField[1], "\"")
+					jsonParsed := strings.Split(rw001, ",")
+					//fmt.Printf("Parsed data: %v, len: %v\n", jsonParsed, len(jsonParsed))
+					var gettedMes C.struct_Message = C.makeMes(C.CString(""), 0)
+					for j := 0; j < len(jsonParsed)-12; j++ {
+						jsonField := strings.Split(jsonParsed[j], ":")
+						jsonField[0] = strings.Trim(jsonField[0], "\"")
+						jsonField[1] = strings.Trim(jsonField[1], "\"")
 
-					//fmt.Printf("(%v)Parsed data: %v\n", jsonParsed, jsonField)
+						//fmt.Printf("(%v)Parsed data: %v\n", jsonParsed, jsonField)
 
-					//fmt.Printf("(warning) \"%v\" - is unknowen JSON field with \"%v\" data\n", jsonField[0], jsonField[1])
+						//fmt.Printf("(warning) \"%v\" - is unknowen JSON field with \"%v\" data\n", jsonField[0], jsonField[1])
 
-					if jsonField[0] == "body" {
-						//fmt.Printf("\"%v\"\n", jsonField[1])
-						gettedMes.content = C.CString(jsonField[1])
-					} else if jsonField[0] == "date" {
-						itn, _ = strconv.Atoi(jsonField[1])
-						gettedMes.date = C.time_t(itn)
-					} else if jsonField[0] == "sender" {
-						itn, _ := strconv.Atoi(jsonField[1])
-						// fmt.Printf("%v", reee)
-						// fmt.Printf("PARSING USERID (%v)(%v)!\n", jsonField[1], itn)
-						gettedMes.userid = C.int(itn)
+						if jsonField[0] == "body" {
+							//fmt.Printf("\"%v\"\n", jsonField[1])
+							gettedMes.content = C.CString(jsonField[1])
+						} else if jsonField[0] == "date" {
+							itn, _ = strconv.Atoi(jsonField[1])
+							gettedMes.date = C.time_t(itn)
+						} else if jsonField[0] == "sender" {
+							itn, _ := strconv.Atoi(jsonField[1])
+							// fmt.Printf("%v", reee)
+							// fmt.Printf("PARSING USERID (%v)(%v)!\n", jsonField[1], itn)
+							gettedMes.userid = C.int(itn)
+						}
 					}
+					if j == 0{
+						// C.
+					}
+					C.pushMessageToML(gettedMes, ml)
+					
 				}
-				C.pushMessageToML(gettedMes, ml)
 			}
 		}
 		// count := strconv.Atpi(words[])
@@ -313,31 +318,34 @@ func syncUsers(userList *C.struct_UserList) C.int {
 			words = strings.Split(lines[i], " ")
 			if words[0] == "Count:" {
 				newMes, _ = strconv.Atoi(words[1])
-			}
-			for j := 0; j < newMes; j++ {
-				i++
-				rw001 := strings.Trim(lines[i], "{")
-				rw001 = strings.Trim(rw001, "}")
+			} else if lines[i] == "" {
+				for j := 0; j < newMes; j++ {
+					i++
+					rw001 := strings.Trim(lines[i], "{")
+					rw001 = strings.Trim(rw001, "}")
 
-				jsonParsed := strings.Split(rw001, ",")
-				// fmt.Printf("Parsed data: %v, len: %v\n", jsonParsed, len(jsonParsed))
-				var uname string
-				for j := 0; j < len(jsonParsed); j++ {
-					jsonField := strings.Split(jsonParsed[j], ":")
-					jsonField[0] = strings.Trim(jsonField[0], "\"")
-					jsonField[1] = strings.Trim(jsonField[1], "\"")
+					jsonParsed := strings.Split(rw001, ",")
+					// fmt.Printf("Parsed data: %v, len: %v\n", jsonParsed, len(jsonParsed))
+					var uname string
+					for j := 0; j < len(jsonParsed); j++ {
+						// fmt.Printf("CUR: %v\n", jsonParsed)
+						jsonField := strings.Split(jsonParsed[j], ":")
+						jsonField[0] = strings.Trim(jsonField[0], "\"")
+						jsonField[1] = strings.Trim(jsonField[1], "\"")
+						jsonField[1] = strings.Trim(jsonField[1], "}")
 
-					if jsonField[0] == "username" {
-						uname = jsonField[1]
-					} else if jsonField[0] == "MAC" {
-						if len(uname) >= len(jsonField[1]) {
-							uname = jsonField[1] + "\n" + uname
-						} else {
-							uname = jsonField[1] + "\t\t" + uname
+						if jsonField[0] == "username" {
+							uname = jsonField[1]
+						} else if jsonField[0] == "MAC" {
+							if len(uname) >= len(jsonField[1]) {
+								uname = jsonField[1] + "\r" + uname
+							} else {
+								uname = jsonField[1] + "\t\t" + uname
+							}
 						}
 					}
+					C.pushUserToUL(C.CString(uname), userList)
 				}
-				C.pushUserToUL(C.CString(uname), userList)
 			}
 		}
 		// count := strconv.Atpi(words[])

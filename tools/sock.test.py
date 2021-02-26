@@ -71,7 +71,7 @@ while True:
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
-                            conn.send(b'OSSA-PTC: 0000f11a\nTotal: 15\n')
+                            conn.send(b'OSSA-PTC: 0000f11a\nTotal: 1\n')
                             print("MO")
                         else:
                             conn.send(b'OSSA-PTC: 0000f10a\nERROR: 51\n')
@@ -80,7 +80,7 @@ while True:
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
-                            conn.send(b'OSSA-PTC: 000bf11f\nCount: 1\nContent:next\n{\"body\":\"Hi!\",\"date\":\"16666213\",\"sender\":\"1\"}\n')
+                            conn.send(b'OSSA-PTC: 000bf11f\nCount: 1\n\n{\"body\":\"Hi!\",\"date\":\"16666213\",\"sender\":\"1\"}\n\0')
                             print("MU")
                         else:
                             conn.send(b'OSSA-PTC: 0000f10a\nERROR: 51\n')
@@ -89,7 +89,7 @@ while True:
             for i in range(0, len(addr_active)):
                 if(addr_active[i] == addr):
                         if(addr_unames[i] != '$none'):
-                            conn.send(b'OSSA-PTC: 002ba110\nCount: 3\nContent:next\n{\"username\":\"system\"}\nContent:next\n{\"username\":\"16666213\"}\nContent:next\n{\"username\":\"1\"}\n')
+                            conn.send(b'OSSA-PTC: 002ba110\nCount: 3\n\n{\"username\":\"alex\"}\n{\"username\":\"16666213\"}\n{\"username\":\"1\"}\n\0')
                             print("MU")
                         else:
                             conn.send(b'OSSA-PTC: 0000f10a\nERROR: 51\n')

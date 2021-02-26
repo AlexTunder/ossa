@@ -17,15 +17,17 @@
 #define CCHAT_FLAG_NOCRYPTO 1<<0
 //Drop only chat
 #define CCHAT_FLAG_DROPOCWM 1<<1
-//Enable native access mode
+//Enable native soft-access mode
 #define CCHAT_FLAG_ACCESS_E 1<<2
 //Runtime network sending
 #define CCHAT_FLAG_RUNTIMEN 1<<3
 //Native audio support
 #define CCHAT_FLAG_NAUDIO_E 1<<4
+//Dynamic or static language map
+#define CCHAT_FLAG_DYNLANMP 1<<5
 
 #ifdef SETTINGS
-int CCHAT_GLOBAL_SETTINGS = CCHAT_FLAG_ACCESS_E;
+int CCHAT_GLOBAL_SETTINGS = CCHAT_FLAG_ACCESS_E | CCHAT_FLAG_DYNLANMP;
 #endif
 
 /**
