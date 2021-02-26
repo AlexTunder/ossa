@@ -424,13 +424,19 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         if(!strcmp(comm[1], "proto")){
             //Downloading proto from https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/[proto]
             // curl [link] -o [target]
-            char *url = (char*)malloc(strlen("curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/ -o ")+strlen(comm[2])+strlen(comm[2]));
-            sprintf(url, "curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/%s -o %s", comm[2], comm[2]);
+            char *url = (char*)malloc(strlen("curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/ -o ")+strlen(comm[2])+strlen(comm[2])+10);
+            #ifndef __WIN32
+             sprintf(url, "curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/%s.so -o %s.so", comm[2], comm[2]);
+            #else
+             sprintf(url, "curl https://raw.githubusercontent.com/AlexTunder/ossa-ptc/main/%s.dll -o %s.dll", comm[2], comm[2]);
+            #endif
             system(url);
-        }else if(comm[1], "lang"){
+        }else if(!strcmp(comm[1], "lang")){
             char *url = (char*)malloc(strlen("curl https://raw.githubusercontent.com/AlexTunder/ossa/master/languages/ -o ")+strlen(comm[2])+strlen(comm[2])+10);
             sprintf(url, "curl https://raw.githubusercontent.com/AlexTunder/ossa/master/languages/%s.lang -o %s.lang", comm[2], comm[2]);
             system(url);
+        }else{
+            printf(ANSI_COLOR_RED"invalid tag"ANSI_COLOR_RESET": %s\n", comm[1]);
         }
     }
     else {
