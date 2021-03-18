@@ -30,3 +30,6 @@ lib: CBase net
 test.net:
 	@make lib -s
 	@make -C network api-test -s
+bengo:
+	@echo [CC] cli/bengo
+	@$(CC) ./cli/bengo.c -o ./bin/bengo -g3

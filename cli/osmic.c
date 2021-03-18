@@ -16,12 +16,11 @@
  #include<conio.h>
 #endif
 
-#include "../core/ptcload.h"
-#include "../core/osmic.h"
-#include "../core/envl.c"
-#include "../network/api.h"
+// struct DynamicLanguageMap strStorage;
 
-struct LangMap strStorage;
+#include "../core/osmic.h"
+#include "../core/ptcload.h"
+#include "../network/api.h"
 
 //CLI codes
 #define CLI_OK_NOUT 0x00f0
@@ -77,7 +76,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 if(strcmp(comm[1], "\0"))
                     return pushUser(comm[1], chat);
         }
-        else printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_users, ANSI_COLOR_RESET);
+        // else printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_users"), ANSI_COLOR_RESET);
         return CLI_OK_NOUT;
     } else if(!strcmp(comm[0], "lsuser")){
         int max = getUsersCount(chat);
@@ -94,7 +93,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     return CLI_OK_NOUT;
                 }
             }else{
-                printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_evlog, ANSI_COLOR_RESET);
+                // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_evlog"), ANSI_COLOR_RESET);
                 return CLI_NOPERM;
             }
         }else if(!strcmp(comm[1], "user")){
@@ -103,13 +102,13 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                 if(!strcmp(comm[3], "role")){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, atoi(comm[4]), &chat->userList);
-                    else
-                        printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
+                    // else
+                        // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_roler"), ANSI_COLOR_RESET);
                 } else if(!strcmp(comm[3], "ban")){
                     if(getUserAccess(*me, &chat->userList) & acc_roler)
                         addUserToRole(&chat->roler, target, 0, &chat->userList);
                     else{
-                        printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
+                        // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_roler"), ANSI_COLOR_RESET);
                     }
                 } else if(!strcmp(comm[3], "name")){
                     struct UserList *counter = &chat->userList;
@@ -122,7 +121,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     strcpy(counter->name, comm[4]);
                 }
             }else{
-                printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_users, ANSI_COLOR_RESET);
+                // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_users"), ANSI_COLOR_RESET);
             }
         }else if(!strcmp(comm[1], "role")){
             if(getUserAccess(*me, &chat->userList) & acc_roler){
@@ -135,7 +134,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
                     }
                 }
             }else{
-                printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
+                // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_roler"), ANSI_COLOR_RESET);
             }
         }else if(!strcmp(comm[1], "chat")){
             currentChat = atoi(comm[2]);
@@ -144,7 +143,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         else {printf("bad \'set\' parameter (%s)\n", comm[1]);return CLI_CNF;}
     } else if(!strcmp(comm[0], "view")){
         if(!(getUserAccess(*me, &chat->userList) & 0b01)){
-            printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.ban, ANSI_COLOR_RESET);
+            // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "ban"), ANSI_COLOR_RESET);
             return CLI_NOPERM;
         }
         if(!strcmp(comm[1], "all")){
@@ -154,7 +153,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }
     } else if(!strcmp(comm[0], "lsrole")){
         // printf("ID\tMemory\t\t\tRole name\tAccess code\tAccess number\n");
-        printf("ID\t%s\t\t\t%s\t%s\t%s\n", strStorage.titles.memory, strStorage.titles.role_name, strStorage.titles.access_code, strStorage.titles.access_number);
+        // printf("ID\t%s\t\t\t%s\t%s\t%s\n", dlmGetTranslation(&strStorage, "memory"), dlmGetTranslation(&strStorage, "role_name"),dlmGetTranslation(&strStorage, "access_code"), dlmGetTranslation(&strStorage, "access_number"));
         if (strcmp(comm[1], "")){
             int index = atoi(comm[2]);
             printf("%i\t%p\t%s\t%x\t%i\n", index, getRoleByIndex(&chat->roler, index), getRoleByIndex(&chat->roler, index)->name, getRoleByIndex(&chat->roler, index)->access, getRoleByIndex(&chat->roler, index)->access);
@@ -167,7 +166,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         if(getUserAccess(*me, &chat->userList) & acc_roler)
             addRole(&chat->roler, comm[1], 0);
         else{
-            printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.no_acc_roler, ANSI_COLOR_RESET);
+            // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "no_acc_roler"), ANSI_COLOR_RESET);
         }
     } else if(!strcmp(comm[0], "recompile")){
         char settings = 0; //1 bit = basic, 2 bit = updater, 3 bit = norun, 4 - main only
@@ -219,10 +218,10 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         int user_id = atoi(comm[1]);
         int role_id = atoi(comm[2]);
         if(getRoleByIndex(&chat->roler, role_id) != NULL){
-            printf("(%i)%s %s (%i)%s: ", user_id, getUsernameByID(user_id, &chat->userList), strStorage.output.user_in_role, role_id, getRoleByIndex(&chat->roler, role_id)->name);
-            if(checkInRole(getRoleByIndex(&chat->roler, role_id), user_id))
-                printf("%s\n", strStorage.logic.yes);
-            else printf("%s\n", strStorage.logic.no);
+            // printf("(%i)%s %s (%i)%s: ", user_id, getUsernameByID(user_id, &chat->userList), dlmGetTranslation(&strStorage, "user_in_role"), role_id, getRoleByIndex(&chat->roler, role_id)->name);
+            // if(checkInRole(getRoleByIndex(&chat->roler, role_id), user_id))
+            //     printf("%s\n", dlmGetTranslation(&strStorage, "yes"));
+            // else printf("%s\n", dlmGetTranslation(&strStorage, "no"));
         }
     } else if(!strcmp(comm[0], "ban")){
         int user_id = atoi(comm[1]);
@@ -298,17 +297,17 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
             }
     } else if(!strcmp(comm[0], "load")){
         if(!strcmp(comm[1], "")){
-            printf("%s \':load [filename]\'\n", strStorage.error.no_chat_file);
+            // printf("%s \':load [filename]\'\n", dlmGetTranslation(&strStorage, "no_chat_file"));
             return CLI_OK_NOUT;
         }
-        printf("%s [y/N] ", strStorage.output.chat_load_are_you_sure);
+        // printf("%s [y/N] ", dlmGetTranslation(&strStorage, "chat_load"));
         char a = getchar();
         if(a == 'y' || a == 'Y'){
             last = 0;
             chat->messages = loadMLFromFile(comm[1]);
             chat->userList = loadULFromFile("user.list");
             chat->roler = loadRolerFromFile("roles.list");
-        }else printf("%s\n", strStorage.output.aborted);
+        }//else printf("%s\n", dlmGetTranslation(&strStorage, "aborted"));
     }else if(!strcmp(comm[0], "help")){
         FILE *help = fopen("HELP.md", "r");
         char *link = 0x0;
@@ -459,7 +458,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }
     } else if(!strcmp("env-ctl", comm[0])){
         if(!strcmp("update", comm[1])){
-            loadLMFromFile(langPath, &strStorage);
+            // loadDLMFromFile(langPath, &strStorage);
         }else if(!strcmp("list", comm[1])){
             //List all enviroments
         }
@@ -483,7 +482,7 @@ int handleCommand(char comm[32][16], struct Chat *chat, int *me){
         }
     }
     else {
-        printf("%s (\'%s\')\n", strStorage.error.command_not_found, comm[0]);
+        // printf("%s (\'%s\')\n", dlmGetTranslation(&strStorage, "command_not_found"), comm[0]);
         return CLI_CNF;
     }
     return 0;
@@ -530,7 +529,7 @@ int handleCLI(struct Chat *chat, int *me){
             else input[++counter] = c;
         }while(c != '\n');
         if(!(getUserAccess(*me, &chat->userList) & 0b10)){
-            printf("%s%s%s", ANSI_COLOR_RED, strStorage.access.muted, ANSI_COLOR_RESET);
+            // printf("%s%s%s", ANSI_COLOR_RED, dlmGetTranslation(&strStorage, "muted"), ANSI_COLOR_RESET);
             return CLI_NOPERM;
         }
         pushMessage(makeMes(input, *me), chat);
@@ -542,7 +541,7 @@ int handleCLI(struct Chat *chat, int *me){
 int main(int argc, char **argv){
     /* Languages */
     #ifdef __WIN32
-     system("chcp 65001"); //Setting up UTF-8!
+    //  system("chcp 65001"); //Setting up UTF-8!
     #endif
     /* default settings */
     langPath = (char*)malloc(10240);
@@ -559,10 +558,12 @@ int main(int argc, char **argv){
             langPath = argv[++i];
         }
     }
-    loadLMFromFile(langPath, &strStorage);
+    printf("loading langs...\n");
+    // loadDLMFromFile(langPath, &strStorage);
+    printf("loaded langs...\n");
     // printf("locale: \'%s\'\n", strStorage.details.locale);
-    setlocale(LC_ALL, strStorage.details.locale);
-    printf("%s\n", strStorage.output.welcome); //Welcome!
+    // setlocale(LC_ALL, dlmGetTranslation(&strStorage, "locale"));
+    // printf("%s\n", dlmGetTranslation(&strStorage, "welcome")); //Welcome!
     /* main code */
    int me = 0;
    cl.chat = initChat(0x0);
@@ -576,7 +577,7 @@ int main(int argc, char **argv){
        struct ChatList *cur = getChatChainByIndex(&cl, currentChat);
        for(int i = last; i < getMessagesCount(&cur->chat); i++){
                struct Message mes = getMessage(&cur->chat, i); 
-               printf("(%i)%s@[%s]: %s\n\t%s:<%I64i>\n", i, getUsernameByID(mes.userid, &cur->chat.userList), cur->name, mes.content, strStorage.output.sended ,mes.date);
+               printf("(%i)%s@[%s]: %s\n\t%s:<%I64i>\n", i, getUsernameByID(mes.userid, &cur->chat.userList), cur->name, mes.content, "sended:" ,mes.date);
                last = i+1;
                if(last == getMessagesCount(&cur->chat)) printf("\n");
        }
@@ -584,7 +585,7 @@ int main(int argc, char **argv){
     int code = handleCLI(&cur->chat, &me);
     if(code < CLI_ERRF) last ++;
     else if(code == CLI_EXIT){
-        printf("%s\n", strStorage.output.exit);
+        // printf("%s\n", dlmGetTranslation(&strStorage, "exit"));
         // destroyUL(&chat.userList);
         for(int i = 0; i < getChatChainLen(&cl); i++){
             closeServer(i);

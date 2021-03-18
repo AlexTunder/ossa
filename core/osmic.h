@@ -3,3 +3,4 @@
 #include "base.h"
 #define CCHAT_RM_STREAM
 #include "fileworks.h"
+#include "./list.c"
