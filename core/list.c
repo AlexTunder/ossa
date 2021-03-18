@@ -147,10 +147,14 @@ struct __booster_info __booster_append(struct __list_booster *_this, int size){
 // }
 
 struct __booster_info __booster_assamble(struct __list_booster *_this){
+    struct __booster_info me;
+    me.error = me.index = 0;
+    me.target = 0x0;
     int __len = _this->len;
     for(int i = 1; i < _this->pointsCount; i++){
         _this->points[i] = listFrame(_this->points[i-1], __len/_this->pointsCount);
     }
+    return me;
 }
 
 struct __list *listFrame(struct __list *_this, int index){
@@ -161,7 +165,6 @@ struct __list *listFrame(struct __list *_this, int index){
 
 struct __booster_info __booster_get(struct __list_booster *_this, int index){
     struct __booster_info me;
-    int phi = _this->len % _this->pointsCount;
     // unsigned int frame = _this->pointsCount * (index - phi) / _this->len;
     unsigned int frame = 0;
     if(_this->len / _this->pointsCount>=1)

@@ -13,6 +13,9 @@ else
 endif
 CC_FLAG += -std=c99
 
+CNeoBase:
+	@echo [CC] core/newobase.c
+	@$(CC) -c core/neobase.c -o lib/libossa.a -std=c99
 CBase:
 	@echo [CC] core/base.c
 	@$(CC) -c core/base.c -o lib/libossa.a -std=c99
@@ -32,4 +35,4 @@ test.net:
 	@make -C network api-test -s
 bengo:
 	@echo [CC] cli/bengo
-	@$(CC) ./cli/bengo.c -o ./bin/bengo -g3
+	@$(CC) ./cli/bengo.c -o ./bin/bengo -g3 -Wall

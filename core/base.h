@@ -98,7 +98,7 @@ struct Message getLastFromML(struct MessageList *ml);
  */ extern
 struct Message getMessageML(struct MessageList *ml, int index);
 /**
- * @brief LOL what?
+ * @brief Get message from message list under index
  * 
  * @param ml 
  * @param index 

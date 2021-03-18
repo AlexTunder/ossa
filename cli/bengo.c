@@ -23,5 +23,5 @@ int main(int argc, char **argv){
     ptr = &ptr[1];
     name = (char*)ptr;
     strcpy(name, "argv[1]");
-    printf("Full, unsafe: %s\n\taccess: %i\n\tname:%s\n", __booster_get(&users, 1).target, astype(int)__booster_get(&users, 1).target,(char*)__booster_get(&users, 1).target+4);
+    printf("Full, unsafe\n\taccess: %i\n\tname:%s\n", astype(int)__booster_get(&users, 1).target,(char*)__booster_get(&users, 1).target+4);
 }
