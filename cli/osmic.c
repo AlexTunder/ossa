@@ -18,7 +18,7 @@
 
 // struct DynamicLanguageMap strStorage;
 
-#include "../core/osmic.h"
+#include "./osmic.h"
 #include "../core/ptcload.h"
 #include "../network/api.h"
 

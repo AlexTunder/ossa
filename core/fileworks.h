@@ -7,7 +7,7 @@
 #endif
 #ifndef CCHAT_USE_SRC
  #ifndef CCHAT_FILEWORKS_H
-   ifndef CCHAT_RM_STREAM
+  //  #ifndef CCHAT_RM_STREAM
    struct MessageList loadMLFromStream(const char *target);
    struct UserList loadULFromStream(const char *target);
    struct Roler loadRolerFromStream(const char *target);

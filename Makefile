@@ -24,7 +24,7 @@ net:
 	@make -C ./network -s
 osmic:
 	@echo [CC] cli/osmic.c
-	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG) ./lib/libossac.a
+	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG) ./lib/libossac.a ./lib/libossa.a
 osmic-gdb:
 	@echo [CC] cli/osmic.c
 	@$(CC) cli/osmic.c -o bin/osmic $(CC_FLAG) ./lib/libossac.a -g3
